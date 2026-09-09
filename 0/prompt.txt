@@ -1,0 +1,5 @@
+it asks run main, a todo, or ML model checkpoints
+
+---
+
+where is the claude code terminal
