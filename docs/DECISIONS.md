@@ -2,6 +2,28 @@
 
 Newest on top.
 
+## 2026-09-10 — Enabled entire.io CLI to capture AI session history in git
+
+- **What:** Installed the [entire](https://entire.io) CLI and ran `entire enable`, which
+  hooked into Claude Code (via `.claude/settings.json` hooks) and started capturing AI
+  coding sessions as git refs (`refs/entire/checkpoints/...`) linked to commits. Added
+  read-only `entire` subcommands (`status`, `session`, `checkpoint`, `blame`, `why`,
+  `recap`, `doctor`, `version`) to the permission allowlist so they don't prompt.
+- **Why:** Requested so anyone reading this repo's history later — Vy, the SWE, or a
+  future Claude session — can see not just *what* changed but the actual AI session
+  that produced it, without relying on chat transcripts living elsewhere.
+- **Privacy tradeoff, explicitly accepted:** by default, checkpoints sync to `origin`
+  alongside code (`entire status` confirms "Checkpoints sync to: origin"). HELP-ME is
+  **public**, so this means captured AI session content (prompts, tool calls) becomes
+  publicly visible in git history, not just the code. This was flagged before enabling
+  and the call was made deliberately to let checkpoints go public rather than route
+  them to a separate private remote. If that changes, checkpoint routing is reconfigured
+  via `entire configure`, not by disabling capture entirely.
+- **Not yet done:** `entire login` (browser OAuth to a hosted Entire account) — that's a
+  one-time human step neither I nor a future session can complete on someone else's
+  behalf. Local checkpoint capture works without it; login only gates hosted features
+  (cross-repo `entire activity`, semantic `entire search`, etc.).
+
 ## 2026-09-10 — Repo set up as a GitHub Pages site with worktree + PR workflow
 
 - **What:** Made the repo public, turned on GitHub Pages (source: `main` branch, root),
