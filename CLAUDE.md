@@ -3,8 +3,10 @@
 A personal GitHub Pages site — one site, one URL, navigated via tabs (see `js/main.js`) —
 plus whatever supporting scripts/tools produced its content. Public repo.
 
-This is a shared account: Vy (non-technical, architect) is the primary user; a SWE
-reviews her work via PRs. Optimize for a reviewable, readable git history over speed.
+This is a shared account: Vy (non-technical, architect) is the primary user, and she
+should never have to think about git/PRs/reviewing — work end-to-end and keep moving.
+PRs exist for a clean, readable history a human SWE can look back through later, not
+as an approval gate. Optimize for a reviewable git history over ceremony.
 
 ## Layout
 
@@ -22,8 +24,9 @@ reviews her work via PRs. Optimize for a reviewable, readable git history over s
 - **New feature/task → worktree.** Use `EnterWorktree` before making changes so the
   main checkout stays clean on `main`. `ExitWorktree` with `remove` once the PR merges,
   `keep` if the work is still in flight.
-- **PRs, not direct pushes to `main`.** Push the branch, open a PR (`gh pr create`), and
-  leave it for the human SWE to review — don't merge your own PRs here.
+- **PRs, then merge them yourself.** Push the branch, open a PR (`gh pr create`),
+  verify it works, then merge (`gh pr merge --squash --delete-branch`) and move on —
+  don't wait on approval.
 - **Clean history.** Small, atomic, logically-scoped commits with messages that explain
   *why*, not just what — a reviewer with no chat history should be able to follow along
   from `git log` / the PR description alone.
