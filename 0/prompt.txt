@@ -1,0 +1,13 @@
+claude mcp add -s user qgis -- uvx --refresh-package qgis-mcp --from "https://github.com/nkarasiak/qgis-mcp/archive/refs/heads/main.zip" qgis-mcp-server
+
+---
+
+start the server
+
+---
+
+qgis is open and server is clicked
+
+---
+
+what do i saw in the new session
