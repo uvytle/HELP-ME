@@ -1,0 +1,5 @@
+make sure this chat log is connected to the qgis  port 9876
+
+---
+
+the power transmission lines are mapping the network that transfer power or data? if its only for transferring power, i need fiber networks in the us that transfer data. lumen technologies( https://www.lumen.com/en-us/resources/network-maps.html)  fiber network map is a good source but thats only one company i need a full map of fiber networks that transfer data, even if it overlaps with the power transmission lines network. keep the power transmission lines layer but do a new layer with the daa trtansferring networks in the us
