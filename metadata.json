@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M35D30YMPJ5A0Q9A76N6Y2FA",
+  "strategy": "manual-commit",
+  "branch": "worktree-datacenter-locations",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "scripts/datacenter-locations/.gitignore",
+    "scripts/datacenter-locations/README.md",
+    "scripts/datacenter-locations/build_dataset.py",
+    "scripts/datacenter-locations/data/datacenters_us.xlsx",
+    "scripts/datacenter-locations/requirements.txt",
+    "scripts/datacenter-locations/sources/__init__.py",
+    "scripts/datacenter-locations/sources/cloud_regions.py",
+    "scripts/datacenter-locations/sources/osm_overpass.py",
+    "scripts/datacenter-locations/sources/peeringdb.py",
+    "scripts/datacenter-locations/sources/usdatamap.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 48,
+    "cache_creation_tokens": 81424,
+    "cache_read_tokens": 1930187,
+    "output_tokens": 15521,
+    "api_call_count": 24
+  }
+}

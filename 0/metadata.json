@@ -1,0 +1,56 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M35D30YMPJ5A0Q9A76N6Y2FA",
+  "session_id": "f39900ce-89d4-440e-b6a9-8a74486eb63d",
+  "strategy": "manual-commit",
+  "created_at": "2026-09-22T20:32:06.4099011Z",
+  "branch": "worktree-datacenter-locations",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "scripts/datacenter-locations/.gitignore",
+    "scripts/datacenter-locations/README.md",
+    "scripts/datacenter-locations/build_dataset.py",
+    "scripts/datacenter-locations/data/datacenters_us.xlsx",
+    "scripts/datacenter-locations/requirements.txt",
+    "scripts/datacenter-locations/sources/__init__.py",
+    "scripts/datacenter-locations/sources/cloud_regions.py",
+    "scripts/datacenter-locations/sources/osm_overpass.py",
+    "scripts/datacenter-locations/sources/peeringdb.py",
+    "scripts/datacenter-locations/sources/usdatamap.py"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5",
+  "turn_id": "3379ab72ae43",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 48,
+    "cache_creation_tokens": 81424,
+    "cache_read_tokens": 1930187,
+    "output_tokens": 15521,
+    "api_call_count": 24
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-09-22T20:32:06.3601046Z",
+    "agent_lines": 495,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 495,
+    "total_lines_changed": 495,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
