@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M360P6VG1S4ZYZWN70EEPTPS",
+  "session_id": "f39900ce-89d4-440e-b6a9-8a74486eb63d",
+  "strategy": "manual-commit",
+  "created_at": "2026-09-24T19:22:11.6098023Z",
+  "branch": "claude/qgis-mcp-server-setup-e1dc4d",
+  "checkpoints_count": 15,
+  "files_touched": [],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5",
+  "turn_id": "25df53a42bd1",
+  "checkpoint_transcript_start": 405,
+  "transcript_lines_at_start": 405,
+  "compact_transcript_start": 68,
+  "token_usage": {
+    "input_tokens": 410,
+    "cache_creation_tokens": 950209,
+    "cache_read_tokens": 70230157,
+    "output_tokens": 186643,
+    "api_call_count": 205
+  },
+  "session_metrics": {
+    "turn_count": 16
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
