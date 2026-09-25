@@ -65,6 +65,20 @@ SEED_LAYERS = [
     (ODOT_LINES, "ODOT provider-submitted broadband lines", "Oklahoma Department of Transportation",
      "public", "public agency ArcGIS org (OKDOT_GIS): 'Data provided by Broadband service "
      "providers and combined by ODOT'", "existing"),
+    # Connecticut towns. Neither service title says "fiber", so discovery missed them.
+    # Simsbury's AxisGIS utilities service (hosted by CAI, the town's GIS vendor):
+    # town fiber between government buildings and schools.
+    ("https://services3.arcgis.com/GaMMT4zu91fXvO6I/arcgis/rest/services/Utilities/FeatureServer/37",
+     "Simsbury town fiber optic lines", "Town of Simsbury, CT", "public",
+     "town AxisGIS utilities service (CAI_SimsburyCT, the town's hosted GIS)", "existing"),
+    # Torrington Traffic Division's signal-network survey; the account holds only
+    # Torrington city layers. Only the telephone-duct fiber is existing.
+    *[(f"https://services7.arcgis.com/cszgVAzZgLvRmS7T/arcgis/rest/services/Fiber_Optic_Signal_Network_WFL1/FeatureServer/{i}",
+       f"Torrington traffic signal fiber: {name}", "City of Torrington, CT", "public",
+       "city Traffic Division draft data (account holds only Torrington city layers)", status)
+      for i, name, status in [(22, "telephone duct fiber", "existing"),
+                              (21, "proposed RMC conduit fiber", "planned"),
+                              (20, "proposed overhead fiber", "planned")]],
 ]
 
 # Per-layer row filters applied when a seeded layer is downloaded.
