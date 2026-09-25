@@ -337,12 +337,14 @@ def discover() -> list[dict]:
 
 def _fetch_one(row: dict) -> gpd.GeoDataFrame | None:
     try:
-        gdf = fetch_layer(row["layer_url"])
+        gdf = fetch_layer(row["layer_url"], where=carrier_maps.LAYER_WHERE.get(row["layer_url"], "1=1"))
     except Exception as exc:  # noqa: BLE001 - one dead layer shouldn't kill the build
         print(f"    skip {row['title']} / {row['layer_name']}: {exc}")
         return None
     if gdf.empty:
         return None
+    if row["layer_url"] in carrier_maps.DEDUPE_GEOMETRY:
+        gdf = gdf[~gdf.geometry.to_wkb().duplicated()]
     attr_cols = [c for c in gdf.columns if c != "geometry"]
     attrs = gdf[attr_cols].astype(object).where(gdf[attr_cols].notna(), None)
     return gpd.GeoDataFrame({

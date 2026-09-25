@@ -114,6 +114,9 @@ OVERRIDES: dict[str, tuple[str, str]] = {
     "bmarquard_CravenGIS": ("Craven County, NC", "public"),
     "gisadmin_harnett": ("Harnett County, NC", "public"),
     "fruita_GIS": ("City of Fruita, CO", "public"),
+    # Owns the City of Owasso's web apps (cityofowasso.maps.arcgis.com) and its
+    # parcel/zoning/ward layers; its "IT_Infrastructure" layers are the city's fiber.
+    "MMount2123": ("City of Owasso, OK", "public"),
     "ToledoPort1955": ("Toledo-Lucas County Port Authority", "public"),
     "regionviipdc": ("Region VII Planning & Development Council, WV", "public"),
     "nstephens@carolinemd.org_CCMD": ("Caroline County, MD", "public"),
