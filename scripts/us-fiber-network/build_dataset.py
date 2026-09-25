@@ -28,7 +28,7 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
-from sources import arcgis_fiber, carrier_files, ntad, osm_overpass
+from sources import arcgis_fiber, carrier_files, ntad, osm_overpass, publishers
 
 OUTPUT_PATH = Path(__file__).parent / "data" / "us_fiber_network.gpkg"
 BY_STATE_PATH = Path(__file__).parent / "data" / "us_fiber_by_state.gpkg"
@@ -61,12 +61,44 @@ def clip_to_us(gdf: gpd.GeoDataFrame, us: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf.iloc[sorted(hits)].reset_index(drop=True)
 
 
+DEDUPE_METERS = 10
+PRIORITY = {"carrier": 0, "public": 1}  # anything else (OSM) comes last
+
+
+def dedupe_across_datasets(group: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """Drop features that repeat a route already present in another dataset.
+
+    Many routes are published more than once, e.g. a county's copy of a
+    carrier's network next to the carrier's own. Datasets are visited in
+    priority order (the carrier's own copy, then government, then OSM; bigger
+    datasets first within a tier). A feature is dropped when a point on it
+    lies within DEDUPE_METERS of a feature already kept from a *different*
+    dataset. Features within one dataset are never compared with each other.
+    """
+    g = group.to_crs("EPSG:5070")
+    order = (g.groupby("dataset_title")
+               .agg(prio=("publisher_type", lambda t: PRIORITY.get(t.iloc[0], 2)), n=("geometry", "size"))
+               .sort_values(["prio", "n"], ascending=[True, False]).index)
+    kept: list[gpd.GeoDataFrame] = []
+    for title in order:
+        part = g[g["dataset_title"] == title]
+        if kept:
+            ref = gpd.GeoDataFrame(pd.concat(kept, ignore_index=True)[["geometry"]], crs=g.crs)
+            pts = gpd.GeoDataFrame(geometry=part.geometry.representative_point(), crs=g.crs)
+            near = gpd.sjoin_nearest(pts, ref, max_distance=DEDUPE_METERS, how="left")
+            near = near[~near.index.duplicated()]["index_right"].notna()
+            part = part[~near.reindex(part.index, fill_value=False).values]
+        kept.append(part)
+    return gpd.GeoDataFrame(pd.concat(kept), crs=g.crs).to_crs("EPSG:4326").sort_index()
+
+
 def split_by_state() -> None:
     """Write each fiber feature to a layer named after the state it falls in.
 
     A feature is assigned to the state containing its representative point
     (a point guaranteed to lie on the line), so a segment that crosses a state
-    line lands in exactly one state rather than being cut in two.
+    line lands in exactly one state rather than being cut in two. Routes that
+    appear in several datasets are then de-duplicated per state.
     """
     frames = []
     for layer in FIBER_LAYERS:
@@ -87,6 +119,10 @@ def split_by_state() -> None:
             }, geometry=gdf.geometry, crs=gdf.crs)
         frames.append(gdf)
     fiber = gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs="EPSG:4326")
+    # Some sources ship a whole network as one multi-part line (Vision Net is a
+    # single feature spanning Montana). Split them so each piece is assigned
+    # to the state it's actually in.
+    fiber = fiber.explode(index_parts=False).reset_index(drop=True)
 
     states = gpd.read_file(STATES_URL).to_crs("EPSG:4326")[["NAME", "STUSPS", "geometry"]]
     points = gpd.GeoDataFrame(geometry=fiber.geometry.representative_point(), crs="EPSG:4326")
@@ -95,10 +131,18 @@ def split_by_state() -> None:
     fiber["state"] = hits["NAME"]
     fiber["state_abbr"] = hits["STUSPS"]
 
+    # Agency copies of Lumen/Zayo/Crown Castle only count inside the agency's state.
+    label = fiber["dataset_title"].fillna("") + " " + fiber["layer_name"].fillna("")
+    outside = [publishers.outside_jurisdiction(p or "", l, st or "")
+               for p, l, st in zip(fiber["publisher"], label, fiber["state_abbr"])]
+    print(f"  dropped {sum(outside):,} agency-copied Lumen/Zayo/Crown Castle features outside the agency's state")
+    fiber = fiber[[not o for o in outside]]
+
     BY_STATE_PATH.unlink(missing_ok=True)
     for name, group in sorted(fiber.dropna(subset=["state"]).groupby("state")):
-        group.to_file(BY_STATE_PATH, layer=name, driver="GPKG", engine="pyogrio")
-        print(f"  {name}: {len(group):,}")
+        deduped = dedupe_across_datasets(group)
+        deduped.to_file(BY_STATE_PATH, layer=name, driver="GPKG", engine="pyogrio")
+        print(f"  {name}: {len(deduped):,} ({len(group) - len(deduped):,} cross-dataset duplicates dropped)")
     print(f"-> {BY_STATE_PATH} ({fiber['state'].isna().sum():,} features fell just offshore/outside a state)")
 
 

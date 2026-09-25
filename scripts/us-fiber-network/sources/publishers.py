@@ -6,9 +6,10 @@ Provenance rule (chosen by the user for the thesis map): keep layers
 published by public entities (governments, DOTs, public utilities, tribes,
 universities, nonprofits) and by carriers publishing their own network. Drop
 engineering consultants, Esri demo/sample data, anonymous uploads, and any
-layer that copies Lumen/Zayo/Crown Castle routes unless that carrier itself
+layer that copies Lumen/Zayo/Crown Castle routes unless that carrier itself or
+a government agency (from its own permit/right-of-way/survey records)
 published it. Lumen's own terms say "no duplication permitted"; copies uploaded
-by someone else have no traceable provenance.
+by anyone else have no traceable provenance.
 
 The publisher is resolved, most to least reliable, from:
   1. the ArcGIS Online organization that hosts the service (from the org ID
@@ -132,6 +133,25 @@ OVERRIDES: dict[str, tuple[str, str]] = {
 }
 
 
+# Home state of each agency that publishes Lumen/Zayo/Crown Castle lines. An
+# agency's own permit/right-of-way records only cover its own jurisdiction, so
+# its copy is only trusted inside that state (e.g. Montgomery County, MD also
+# republishes Crown Castle's whole national network, which is not its record).
+# An agency missing from this table has its copy of those carriers dropped.
+JURISDICTION = {
+    "Montgomery County, MD": "MD", "City of Philadelphia": "PA", "City of Boston": "MA",
+    "Arizona State Land Department": "AZ", "Makah Tribe": "WA", "College of William & Mary": "VA",
+    "Town of Milford": "CT", "Florida DOT District 7 (Westshore Interchange project)": "FL",
+}
+
+
+def outside_jurisdiction(publisher: str, label: str, state_abbr: str) -> bool:
+    """True if this is an agency copy of a restricted carrier outside the agency's state."""
+    if not RESTRICTED_CARRIER_RE.search(label) or RESTRICTED_CARRIER_RE.search(publisher):
+        return False
+    return JURISDICTION.get(publisher) != state_abbr
+
+
 def _org_names(org_ids: set[str]) -> dict[str, str | None]:
     def one(org_id: str):
         try:
@@ -207,7 +227,11 @@ def rejection_reason(r: dict) -> str:
     # Vermont's state-owned (SOV) fiber layer is an actual asset inventory.
     if AVAILABILITY_PUBLISHER_RE.search(r["publisher"]) and not re.search(r"sov-owned", label, re.I):
         return "availability data, not routes"
+    # Government agencies publishing these carriers' lines from their own records
+    # (right-of-way permits, utility surveys) are allowed (Vy's call, 2026-09-24);
+    # anyone else's copy is not.
     carrier = RESTRICTED_CARRIER_RE.search(label)
-    if carrier and not RESTRICTED_CARRIER_RE.search(r["publisher"]):
+    if (carrier and r["publisher_type"] != "public"
+            and not RESTRICTED_CARRIER_RE.search(r["publisher"])):
         return f"copy of {carrier.group(0)} routes"
     return ""

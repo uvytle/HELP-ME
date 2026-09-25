@@ -81,8 +81,15 @@ REFINE_RULES = [
     # hex/H3 estimates, corridors) and drafting layers (markup, labels).
     ("title+layer", "derived/not a route", re.compile(
         r"1mile|intersect|h3\b|_h3|est_h3|service ?corridor|face_of_curb|(?<!fiber )centerline|"
-        r"markup|missing_counts|allocation|label|indoor|\bdetails\b|schematic", re.I)),
+        r"markup|missing_counts|allocation|label|indoor|\bdetails\b|schematic|backup|background", re.I)),
     ("title+layer", "outside US", re.compile(r"canada|coquitlam", re.I)),
+    # The per-state search's "conduit" term also finds non-telecom conduit:
+    # stormwater/sewer/irrigation pipes, flood models, street-light conduit.
+    ("title+layer", "not telecom (water/storm/lighting conduit)", re.compile(
+        r"storm|sanitary|sewer|irrigat|drainage|flood|culvert|open channel|icm_model|"
+        r"surcharge|capacityanalysis|water|street ?light|slconduit|lighting|"
+        r"electric(?!.*fib)", re.I)),
+    ("title+layer", "not a route (customers/prospects)", re.compile(r"potential|customers|prospect", re.I)),
 ]
 
 
@@ -203,21 +210,46 @@ def _in_us(extent) -> bool:
     return any(a <= cx <= c and b <= cy <= d for a, b, c, d in US_BOXES)
 
 
+STATES_URL = "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_state_20m.zip"
+# One combined query per state. Needed because ArcGIS search stops at 1,000
+# results per query, so the national keyword queries above are truncated:
+# a 2026-09 per-state check found Boston, Rochester and ErieNet fiber layers
+# that the national queries never reached.
+STATE_QUERY = ('(fiber OR fibre OR conduit OR telecom OR telecommunications OR "middle mile" '
+               'OR backbone OR "dark fiber" OR ITS OR communications)')
+
+
+def _keep(it: dict) -> bool:
+    text = " ".join([it.get("title") or "", " ".join(it.get("tags") or [])])
+    return bool(it.get("url") and TOPIC_RE.search(text)
+                and not ITEM_EXCLUDE_RE.search(it.get("title") or "")
+                and _in_us(it.get("extent")))
+
+
+def _paged_search(params: dict, items: dict[str, dict]) -> None:
+    start = 1
+    while 0 < start <= 1000:  # ArcGIS search caps paging at 1,000 results
+        res = get_json(SEARCH_URL, {**params, "num": 100, "start": start})
+        for it in res.get("results", []):
+            if _keep(it):
+                items[it["id"]] = it
+        start = res.get("nextStart", -1)
+
+
 def _search_items() -> dict[str, dict]:
     items: dict[str, dict] = {}
     for term in SEARCH_TERMS:
         for kind in ("Feature Service", "Map Service"):
-            start = 1
-            while 0 < start <= 1000:  # ArcGIS search caps paging at 1,000 results
-                res = get_json(SEARCH_URL, {"q": f'({term}) type:"{kind}"',
-                                            "num": 100, "start": start})
-                for it in res.get("results", []):
-                    text = " ".join([it.get("title") or "", " ".join(it.get("tags") or [])])
-                    if (it.get("url") and TOPIC_RE.search(text)
-                            and not ITEM_EXCLUDE_RE.search(it.get("title") or "")
-                            and _in_us(it.get("extent"))):
-                        items[it["id"]] = it
-                start = res.get("nextStart", -1)
+            _paged_search({"q": f'({term}) type:"{kind}"'}, items)
+    print(f"  arcgis discovery: {len(items)} items from national keyword search")
+
+    import geopandas as gpd  # only needed here; keeps --refine lightweight
+    states = gpd.read_file(STATES_URL).to_crs("EPSG:4326")
+    for _, st in states.iterrows():
+        x0, y0, x1, y1 = st.geometry.bounds
+        for kind in ("Feature Service", "Map Service"):
+            _paged_search({"q": f'{STATE_QUERY} type:"{kind}"', "bbox": f"{x0},{y0},{x1},{y1}"}, items)
+    print(f"  arcgis discovery: {len(items)} items after per-state search")
     return items
 
 
@@ -280,6 +312,14 @@ def discover() -> list[dict]:
         for row in rows:
             by_url.setdefault(row["layer_url"], row)
     rows = list(by_url.values())
+
+    # Search ranking shifts between runs; never drop a layer that an earlier
+    # discovery found just because this run's queries didn't surface it.
+    if CATALOG_PATH.exists():
+        with CATALOG_PATH.open(newline="", encoding="utf-8") as fh:
+            for old_row in csv.DictReader(fh):
+                if old_row["layer_url"] not in by_url and not old_row.get("seeded"):
+                    rows.append(old_row)
 
     # Keep manual exclusions (exclude_reason=manual) from a previous catalog.
     if CATALOG_PATH.exists():
