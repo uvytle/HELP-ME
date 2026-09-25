@@ -1,0 +1,5 @@
+are you able to source https://www.peeringdb.com/apidocs/#tag/data/operation/listIRRLookups
+
+---
+
+i wanna get raw data for terrestrial fiber network lines for the us
