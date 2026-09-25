@@ -2,6 +2,19 @@
 
 Newest on top.
 
+## 2026-09-25 — CEN's Connecticut map traced from an image, kept as a separate "approximate" layer
+
+- **What:** Vy asked to trace CEN's fiber map (its only public form is a 2018 JPG). It's
+  georeferenced by fitting the real coastline and interstates, not by eyeballed control
+  points. A corner-only fit put the coast kilometres off, because the picture was resized
+  unevenly. The fiber is then extracted by colour and vectorized (`tools/trace_cen_image.py`).
+- **Kept apart on purpose:** it's derived from a picture, not published geometry, so it's
+  a separate GeoJSON plus a separately styled (dashed) QGIS layer, not part of
+  `published_fiber_routes` or the state split. Same "MODELED" treatment the thesis log
+  gives its inferred Virginia/Washington corridors.
+- **Accuracy:** ~170 m per pixel. Highways fit to a ~1 px median; the coast is off more
+  (the basemap's coast is generalized). Expect errors of up to ~1–2 km in places.
+
 ## 2026-09-25 — CT/OK: ODOT provider-submitted lines added, Internet2 and Fibertech CT not
 
 - **What:** Vy asked for Connecticut and Oklahoma lines traced from Infrapedia's network
