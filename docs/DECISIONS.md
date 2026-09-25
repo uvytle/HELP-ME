@@ -15,8 +15,12 @@ Newest on top.
   exact-geometry de-duplication (the same route is stored once per grant co-applicant).
 - **Internet2 not added:** its published map geometry is straight two-point lines between
   cities, so it isn't route data. (The thesis log had described it as "traced"; corrected there.)
-- **Fibertech CT 2012 KML left out, pending Vy:** ~5,000 km statewide, but shared by a
+- **Fibertech CT 2012 KML left out (Vy confirmed, no exception):** ~5,000 km statewide, but shared by a
   personal account with no org, and Fibertech is now Crown Castle. It fails both rules as written.
+- **Second CT pass (Vy: "it seems sparse compared to Infrapedia"):** added Simsbury town
+  fiber and Torrington traffic-signal fiber (seeded; their titles never say "fiber"). CT went
+  318 → 737 segments. It stays thin because Crown Castle (ex-Lightower/Fibertech), Frontier,
+  Comcast/Altice and CEN publish no route data. What Infrapedia shows there is mostly theirs.
 - **Thesis file updated in place** (only OK plus border pieces in MO/AR/KS) instead of a
   full rebuild. Those states have no hand-verified features, so the result matches what
   `--by-state` plus the merge would produce. The old layers were backed up next to it.

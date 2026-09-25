@@ -82,6 +82,12 @@ operator's own website map:
     Connecticut, shared by a personal ArcGIS account (it belongs to someone in
     CT state IT, going by its Nutmeg Network maps) with no agency org.
     That fails both the provenance rule and the Crown Castle rule.
+  - **Second CT pass** (every telecom-ish item inside CT, any type): added
+    Simsbury's town fiber and Torrington's traffic-signal fiber (mostly
+    proposed). New Haven's "City Fiber" layers are no longer public, CEN's
+    fiber map is a 2018 JPG, FirstLight's site blocks automated access, and
+    Crown Castle publishes no map of its own (the public copies are other
+    agencies', valid only in their own states).
 - **Not traceable** (static image/PDF only, sales-gated, or no public map):
   WOW Business, Cox (own site; see ODOT above), Charter/Spectrum, Crown Castle/Lightower, ExteNet, Zayo,
   Arcadian Infracom, MOX, Transtelco, EarthLink, Edison Carrier Solutions, 123NET,
