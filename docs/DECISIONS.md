@@ -2,6 +2,27 @@
 
 Newest on top.
 
+## 2026-09-24 — US fiber route collector: provenance rule, no railroads, data not in git
+
+- **What:** `scripts/us-fiber-network/` gathers publicly published US fiber *route*
+  geometry (mostly ArcGIS layers from cities, counties, DOTs, utilities, carriers, plus
+  OpenStreetMap) and splits it by state. The output feeds the "State & Regional Fiber
+  Networks" group in Vy's thesis QGIS project as `<State> (compiled)` layers.
+- **Provenance rule:** keep public entities + carriers publishing their own network;
+  drop consultants, Esri demo data, anonymous uploads, and Lumen/Zayo/Crown Castle routes
+  not published by that carrier. Vy picked this over "public only" and "everything". It
+  matches the thesis log's earlier calls (Lumen's no-duplication terms, rejecting an
+  untraceable Pennsylvania re-upload, rejecting Vermont's availability-snapped "routes").
+  Excluded layers stay in the committed catalog CSV with a reason, so the rule can be
+  revisited without re-running discovery.
+- **Railroads left out** at Vy's request, even though a lot of long-haul fiber follows
+  rail. Interstates are still collected as a context layer but aren't added to the map.
+- **Generated data is git-ignored.** It's 1–2 GB, far past what belongs in a public
+  Pages repo. The committed catalog makes a rebuild reproducible; the thesis copy lives
+  in Vy's thesis folder.
+- **Ruled out:** InterTubes and FiberLocator (gated/licensed), PeeringDB (AUP), Infrapedia
+  (login plus no downloads). See the thesis methodology log for details.
+
 ## 2026-09-10 — Enabled entire.io CLI to capture AI session history in git
 
 - **What:** Installed the [entire](https://entire.io) CLI and ran `entire enable`, which
