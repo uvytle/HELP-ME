@@ -2,6 +2,26 @@
 
 Newest on top.
 
+## 2026-09-24 — Regional gap-filling: per-state discovery, agency copies of Lumen/Zayo/Crown allowed, BLM skipped
+
+- **Per-state discovery.** ArcGIS search stops at 1,000 results per query, so the
+  national keyword sweep was silently truncated. Discovery now also runs one
+  bounding-box query per state, which more than doubled the candidates (1,316 → 3,078)
+  and found e.g. City of Boston, Pittsburgh, Dallas County and Concord MA fiber. The
+  catalog never drops a layer an earlier run found. New content filters handle the
+  "conduit" noise this brings (storm/sewer/irrigation/street-light conduit, prospect
+  lists), and a missing "backup/background" rule was restored.
+- **Rule change (Vy's call):** Lumen/Zayo/Crown Castle routes are now allowed when a
+  *government agency* published them from its own permit/right-of-way/survey records
+  (Boston, Westchester, Philadelphia, FDOT). Anonymous or other third-party copies stay
+  excluded.
+- **Cross-dataset de-duplication** in the state split (10 m, carrier > government >
+  OSM), since agency copies of carrier networks would otherwise draw routes twice.
+- **BLM right-of-way grants skipped (Vy's call):** ~8,200 fiber/telephone grants with
+  holder names, but the geometry is PLSS survey sections, not cable paths.
+- **Not usable:** Zayo's site (PNG maps only), DCN's map (an unreferenced SVG), Midco's
+  GIS server (login), CEN/OpenCape/NYSERNet/NJEdge/OneNet (no route data published).
+
 ## 2026-09-24 — Infrapedia used for leads only; operator-published data traced from it
 
 - **What:** Vy uses Infrapedia as a reference and asked for its sources. Infrapedia's map

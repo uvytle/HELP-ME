@@ -22,7 +22,9 @@ Takes ~10 minutes. Outputs (git-ignored, too large for the repo, ~1–3 GB):
 
 - `data/us_fiber_network.gpkg`: one layer per source:
   `published_fiber_routes`, `carrier_map_files`, `osm_telecom_lines`, `interstates`.
-- `data/us_fiber_by_state.gpkg`: the three fiber layers combined and split into
+- `data/us_fiber_by_state.gpkg`: the three fiber layers combined, de-duplicated
+  across datasets (a line within 10 m of one already kept from another dataset is
+  dropped; carrier's own copy > government > OSM) and split into
   one layer per state (named e.g. `Ohio`). Interstates are not included.
 
 Other modes: `--discover` re-searches ArcGIS Online for new layers (~10 min),
@@ -34,7 +36,7 @@ the state split, `--only published|files|osm|interstates` rebuilds one layer.
 | Layer | Source | Notes |
 | --- | --- | --- |
 | `published_fiber_routes` | Public ArcGIS layers listed in [`sources/arcgis_fiber_catalog.csv`](sources/arcgis_fiber_catalog.csv) | The bulk of the data. See the next section for how layers are chosen. Each feature keeps its publisher, dataset title, source URL, and the publisher's own attributes (as JSON in `attributes`). |
-| `carrier_map_files` | KMZ/GeoPDF files carriers publish on their own websites ([`sources/carrier_files.py`](sources/carrier_files.py)) | US Signal and Midwest Fiber Networks (KMZs their website maps load), plus Southern Telecom (GeoPDFs, extracted by [`tools/extract_geopdf.py`](tools/extract_geopdf.py) into a committed GeoJSON). |
+| `carrier_map_files` | KMZ/GeoJSON/GeoPDF files operators publish themselves ([`sources/carrier_files.py`](sources/carrier_files.py)) | US Signal and Midwest Fiber Networks (KMZs their website maps load), Vision Net (the GeoJSON behind its Montana coverage map), MassBroadband 123 (MBI's KMZ, via the Internet Archive), and Southern Telecom (GeoPDFs, extracted by [`tools/extract_geopdf.py`](tools/extract_geopdf.py) into a committed GeoJSON). |
 | `osm_telecom_lines` | OpenStreetMap via Overpass (ODbL) | Ways tagged `communication=line`, `telecom=line`, `telecom:medium=fibre`, or `utility=telecom`. Only ~2,000 in the US, so it's sparse. |
 | `interstates` | US DOT / BTS NTAD Eisenhower Interstate System | **Not fiber.** Included as context, because long-haul fiber largely follows highway rights-of-way. Generalized to ~50 m. |
 
@@ -58,10 +60,17 @@ operator's own website map:
   turned up an FDOT District 7 project that publishes surveyed utilities by owner.
   These are in [`sources/carrier_maps.py`](sources/carrier_maps.py) and
   [`sources/carrier_files.py`](sources/carrier_files.py).
+- **Regional follow-ups** (Plains and Northeast gaps): Vision Net (MT),
+  MassBroadband 123 (MA). Dakota Carrier Network's "interactive" map is an
+  unreferenced SVG drawing, Midco's GIS server needs a login, and CEN (CT), OpenCape (MA),
+  NYSERNet, NJEdge and OneNet (OK) publish no route data.
 - **Not traceable** (static image/PDF only, sales-gated, or no public map):
   WOW Business, Cox, Charter/Spectrum, Crown Castle/Lightower, ExteNet, Zayo,
   Arcadian Infracom, MOX, Transtelco, EarthLink, Edison Carrier Solutions, 123NET,
   Windstream's old KMZ page (now a 404).
+- **Considered and skipped (Vy's call):** BLM's national right-of-way layer
+  has ~8,200 telephone/fiber-optic grants with holder names, but its shapes are
+  public-land survey sections, not cable paths.
 - **Found but not used:** a public ArcGIS account named `geocode_Zayo` with
   ~200k Zayo fiber spans including strand counts and availability. It has no
   organization or profile, so it can't be verified as Zayo's own. It looks like
@@ -70,9 +79,11 @@ operator's own website map:
 ## How published layers are chosen
 
 1. **Discovery** (`sources/arcgis_fiber.py: discover`): search ArcGIS Online
-   for public Feature/Map Services about fiber whose extent is in the US. Open
-   each service and keep polyline layers that look like fiber routes. This
-   gives about 1,160 layers.
+   for public Feature/Map Services about fiber whose extent is in the US,
+   first nationally by keyword, then once per state with a bounding box (ArcGIS
+   stops at 1,000 results per query, so the national pass alone misses layers).
+   Open each service and keep polyline layers that look like fiber routes.
+   Layers found by earlier runs are never dropped from the catalog.
 2. **Content filter** (`REFINE_RULES`): drop service drops to individual
    buildings, electric layers bundled into utility maps, derived analysis
    products (buffers, "road within 1 mile of fiber", H3 estimates), coax/cable-TV
@@ -82,9 +93,14 @@ operator's own website map:
    published by **public entities** (governments, DOTs, public utilities and
    co-ops, tribes, universities, nonprofits) or by **a carrier publishing its
    own network**. Drop consultants, Esri demo/sample data, and anonymous
-   uploads. Also drop any Lumen/Zayo/Crown Castle routes not published by that
-   carrier, since those are third-party copies with no traceable provenance,
-   and Lumen's terms prohibit duplication. The publisher is taken from the
+   uploads. Also drop Lumen/Zayo/Crown Castle routes unless that carrier or a
+   **government agency** published them (agencies publish these from their own
+   permit, right-of-way and survey records, e.g. City of Boston, Westchester
+   County, FDOT). An agency's copy only counts **inside its own state**
+   (`publishers.JURISDICTION`): Montgomery County, MD, for instance, also
+   republishes Crown Castle's national network, which isn't its record.
+   Anyone else's copy has no traceable provenance, and Lumen's terms prohibit
+   duplication. The publisher is taken from the
    hosting ArcGIS organization when it's public, otherwise from the item's
    credits or server hostname, and in a few hand-checked cases from an
    unambiguous username (the `OVERRIDES` table).

@@ -26,6 +26,9 @@ UNITI_BASIS = "carrier website: unitiwholesale.com/network-map embeds this ArcGI
 FIBERLIGHT_BASIS = "carrier website: fiberlight.com network coverage map embeds this ArcGIS map"
 KCMO = "https://mapd.kcmo.org/kcgis/rest/services/external/FiberLayersNonKCMO/FeatureServer"
 KCMO_BASIS = "public agency server (mapd.kcmo.org, City of Kansas City, MO)"
+NTIA_MM = ("https://utility.arcgis.com/usrsvcs/servers/53d104cecb964033a75c5cd05cab3657/rest/services/"
+           "MM_Dashboard_Layers_ForPublic/FeatureServer")
+NTIA_BASIS = "federal agency: NTIA's public Middle Mile dashboard layers (NBAM org)"
 
 # (layer_url, dataset title, publisher, publisher_type, basis, status_guess)
 SEED_LAYERS = [
@@ -43,6 +46,18 @@ SEED_LAYERS = [
     *[(f"{KCMO}/{i}", f"KCMO right-of-way fiber: {name}", "City of Kansas City, MO", "public", KCMO_BASIS, "existing")
       for i, name in [(0, "Johnson County"), (1, "Unified Government (KCK)"), (2, "KC Scout (MoDOT/KDOT ITS)"),
                       (3, "Unite Private Networks")]],
+    # Found while filling gaps in MT/WY/ND/SD/OK: public-agency grant and DOT
+    # layers whose titles never say "fiber", so keyword discovery misses them.
+    (f"{NTIA_MM}/1", "NTIA Enabling Middle Mile awarded routes", "NTIA (National Broadband Availability Map)",
+     "public", NTIA_BASIS, "planned"),
+    (f"{NTIA_MM}/0", "NTIA Middle Mile awardees' existing IRU routes", "NTIA (National Broadband Availability Map)",
+     "public", NTIA_BASIS, "existing"),
+    ("https://services5.arcgis.com/YjiGkfGCdfjouFLC/arcgis/rest/services/Middle_Mile_Projects/FeatureServer/0",
+     "Oklahoma middle mile projects", "Oklahoma Broadband Office", "public",
+     "public agency ArcGIS org (Oklahoma Broadband Office)", "planned"),
+    ("https://services1.arcgis.com/dKlvxNSUvl36IGMp/arcgis/rest/services/Anaconda_Butte_Broadband_Routes/FeatureServer/0",
+     "MDT Anaconda-Butte broadband routes", "Montana Department of Transportation", "public",
+     "public agency ArcGIS org (Montana DOT)", "existing"),
 ]
 
 # FDOT District 7's Tampa Westshore Interchange project publishes the surveyed
