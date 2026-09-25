@@ -21,24 +21,51 @@ python -m venv .venv
 Takes ~10 minutes. Outputs (git-ignored, too large for the repo, ~1–3 GB):
 
 - `data/us_fiber_network.gpkg`: one layer per source:
-  `published_fiber_routes`, `osm_telecom_lines`, `interstates`.
-- `data/us_fiber_by_state.gpkg`: the two fiber layers combined and split into
+  `published_fiber_routes`, `carrier_map_files`, `osm_telecom_lines`, `interstates`.
+- `data/us_fiber_by_state.gpkg`: the three fiber layers combined and split into
   one layer per state (named e.g. `Ohio`). Interstates are not included.
 
 Other modes: `--discover` re-searches ArcGIS Online for new layers (~10 min),
 `--refine` re-applies the filter rules to the catalog, `--by-state` redoes only
-the state split, `--only osm|published|interstates` rebuilds one layer.
+the state split, `--only published|files|osm|interstates` rebuilds one layer.
 
 ## Sources
 
 | Layer | Source | Notes |
 | --- | --- | --- |
 | `published_fiber_routes` | Public ArcGIS layers listed in [`sources/arcgis_fiber_catalog.csv`](sources/arcgis_fiber_catalog.csv) | The bulk of the data. See the next section for how layers are chosen. Each feature keeps its publisher, dataset title, source URL, and the publisher's own attributes (as JSON in `attributes`). |
+| `carrier_map_files` | KMZ/GeoPDF files carriers publish on their own websites ([`sources/carrier_files.py`](sources/carrier_files.py)) | US Signal and Midwest Fiber Networks (KMZs their website maps load), plus Southern Telecom (GeoPDFs, extracted by [`tools/extract_geopdf.py`](tools/extract_geopdf.py) into a committed GeoJSON). |
 | `osm_telecom_lines` | OpenStreetMap via Overpass (ODbL) | Ways tagged `communication=line`, `telecom=line`, `telecom:medium=fibre`, or `utility=telecom`. Only ~2,000 in the US, so it's sparse. |
 | `interstates` | US DOT / BTS NTAD Eisenhower Interstate System | **Not fiber.** Included as context, because long-haul fiber largely follows highway rights-of-way. Generalized to ~50 m. |
 
 Railroads were deliberately left out (user request), even though a lot of
 long-haul fiber is also laid along rail.
+
+## Leads from Infrapedia
+
+[Infrapedia](https://www.infrapedia.com/) is a good terrestrial network atlas,
+but it can't be used as a source: the map needs a LinkedIn login and its FAQ
+says the data can't be downloaded. Its public sitemap
+(`infrapedia.com/terrestrialnetworks.xml`, allowed by its robots.txt) does list
+the ~220 networks it shows, though, and Infrapedia's data mostly comes from the
+operators themselves. So each US network on that list was traced back to its
+operator's own website map:
+
+- **Traceable to downloadable data** (in this build): Uniti/Windstream (the
+  ArcGIS map embedded on unitiwholesale.com), FiberLight (ArcGIS map on
+  fiberlight.com), US Signal (KMZs), Southern Telecom (GeoPDFs), and Unite
+  Private Networks (via Kansas City's public right-of-way layers). Tracing also
+  turned up an FDOT District 7 project that publishes surveyed utilities by owner.
+  These are in [`sources/carrier_maps.py`](sources/carrier_maps.py) and
+  [`sources/carrier_files.py`](sources/carrier_files.py).
+- **Not traceable** (static image/PDF only, sales-gated, or no public map):
+  WOW Business, Cox, Charter/Spectrum, Crown Castle/Lightower, ExteNet, Zayo,
+  Arcadian Infracom, MOX, Transtelco, EarthLink, Edison Carrier Solutions, 123NET,
+  Windstream's old KMZ page (now a 404).
+- **Found but not used:** a public ArcGIS account named `geocode_Zayo` with
+  ~200k Zayo fiber spans including strand counts and availability. It has no
+  organization or profile, so it can't be verified as Zayo's own. It looks like
+  internal operational data, and it falls under the Zayo rule anyway.
 
 ## How published layers are chosen
 

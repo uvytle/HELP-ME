@@ -28,7 +28,7 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
-from . import publishers
+from . import carrier_maps, publishers
 from .arcgis import fetch_layer, get_json
 
 CATALOG_PATH = Path(__file__).parent / "arcgis_fiber_catalog.csv"
@@ -75,7 +75,7 @@ REFINE_RULES = [
     ("title+layer", "coax/cable TV", re.compile(r"(?<!fiber )cable routes|cable service", re.I)),
     # Electric-utility layers bundled in "fiber + electric" utility services.
     ("layer", "electric", re.compile(
-        r"elec|primary|secondary|conductor|\bmains?\b|lateral_lines|busbar|aadt|"
+        r"elec(?!om)|primary|secondary|conductor|\bmains?\b|lateral_lines|busbar|aadt|"
         r"overhead lines|underground lines", re.I)),
     # Analysis products derived from fiber (buffers, road segments near fiber,
     # hex/H3 estimates, corridors) and drafting layers (markup, labels).
@@ -151,11 +151,26 @@ def refine(rows: list[dict]) -> list[dict]:
     return rows
 
 
+def merge_seeds(rows: list[dict]) -> list[dict]:
+    """Add the hand-traced layers from carrier_maps, overriding publisher info
+    on any row the keyword search had already found (e.g. Uniti's dark fiber,
+    first seen as an anonymous upload before its account was traced to
+    Uniti's own website)."""
+    by_url = {r["layer_url"]: r for r in rows}
+    for seed in carrier_maps.seed_rows():
+        if seed["layer_url"] in by_url:
+            by_url[seed["layer_url"]].update({k: seed[k] for k in (
+                "publisher", "publisher_type", "publisher_basis", "seeded", "title", "status_guess")})
+        else:
+            rows.append(seed)
+    return rows
+
+
 def refine_catalog() -> None:
     """Re-apply the filter rules to the saved catalog without re-searching."""
     with CATALOG_PATH.open(newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
-    _write_catalog(refine(rows))
+    _write_catalog(refine(merge_seeds(rows)))
 
 
 def _write_catalog(rows: list[dict]) -> None:
@@ -176,7 +191,7 @@ US_BOXES = [(-125.0, 24.0, -66.5, 49.5), (-170.0, 51.0, -129.0, 71.5),
 
 CATALOG_FIELDS = ["include", "exclude_reason", "publisher", "publisher_type",
                   "publisher_basis", "status_guess", "title", "owner", "layer_name",
-                  "feature_count", "layer_url", "item_id"]
+                  "feature_count", "layer_url", "item_id", "seeded"]
 
 
 def _in_us(extent) -> bool:
@@ -275,7 +290,7 @@ def discover() -> list[dict]:
             if r["layer_url"] in old:
                 r["exclude_reason"] = old[r["layer_url"]]
 
-    rows = refine(rows)
+    rows = refine(merge_seeds(rows))
     _write_catalog(rows)
     return rows
 

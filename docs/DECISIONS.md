@@ -2,6 +2,22 @@
 
 Newest on top.
 
+## 2026-09-24 — Infrapedia used for leads only; operator-published data traced from it
+
+- **What:** Vy uses Infrapedia as a reference and asked for its sources. Infrapedia's map
+  is login-gated and its FAQ rules out downloads, so none of its data is used. Only its
+  public sitemap's list of network names is, as leads to trace to each operator's own
+  website map. That added Uniti/Windstream, FiberLight, US Signal, Southern Telecom
+  (GeoPDFs), Midwest Fiber Networks, Kansas City's right-of-way layers (incl. Unite
+  Private Networks) and an FDOT D7 project (`carrier_maps.py`, `carrier_files.py`).
+- **Judgment calls:** a public "geocode_Zayo" ArcGIS account with strand-level Zayo data
+  was left out, since it's unverifiable as Zayo's and looks internal. A Midwest Fiber
+  Networks KMZ with "nda" in its name was skipped in favour of the one labelled
+  "website". Seeded layers still go through the content and Lumen/Zayo/Crown Castle rules.
+- **Southern Telecom GeoPDFs** are extracted once with QGIS's GDAL
+  (`tools/extract_geopdf.py`) and the result committed, because the pip GDAL wheel has
+  no PDF driver.
+
 ## 2026-09-24 — US fiber route collector: provenance rule, no railroads, data not in git
 
 - **What:** `scripts/us-fiber-network/` gathers publicly published US fiber *route*

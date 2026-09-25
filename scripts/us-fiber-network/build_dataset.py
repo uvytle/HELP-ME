@@ -6,7 +6,7 @@ for QGIS.
 
 Run:
     python build_dataset.py              # download everything
-    python build_dataset.py --only osm   # one source (published|osm|interstates)
+    python build_dataset.py --only osm   # one source (published|files|osm|interstates)
     python build_dataset.py --discover   # re-search ArcGIS Online for fiber layers first
     python build_dataset.py --refine     # re-apply catalog filter rules, no download
 
@@ -28,23 +28,25 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
-from sources import arcgis_fiber, ntad, osm_overpass
+from sources import arcgis_fiber, carrier_files, ntad, osm_overpass
 
 OUTPUT_PATH = Path(__file__).parent / "data" / "us_fiber_network.gpkg"
 BY_STATE_PATH = Path(__file__).parent / "data" / "us_fiber_by_state.gpkg"
 US_BOUNDARY_URL = "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_nation_20m.zip"
 STATES_URL = "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_state_20m.zip"
-FIBER_LAYERS = ["published_fiber_routes", "osm_telecom_lines"]
+FIBER_LAYERS = ["published_fiber_routes", "carrier_map_files", "osm_telecom_lines"]
 OSM_TAGS = ["osm_id", "name", "operator", "owner", "communication", "telecom",
             "telecom:medium", "location", "utility", "cables", "ref"]
 
 # GeoPackage layer name -> fetcher
 SOURCES = {
     "published_fiber_routes": arcgis_fiber.fetch,
+    "carrier_map_files": carrier_files.fetch,
     "osm_telecom_lines": osm_overpass.fetch,
     "interstates": ntad.fetch_interstates,
 }
-ALIASES = {"published": "published_fiber_routes", "osm": "osm_telecom_lines", "interstates": "interstates"}
+ALIASES = {"published": "published_fiber_routes", "files": "carrier_map_files",
+           "osm": "osm_telecom_lines", "interstates": "interstates"}
 
 
 def clip_to_us(gdf: gpd.GeoDataFrame, us: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
