@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M3BBZVAG4AP90J2TFG3W2X0F",
+  "strategy": "manual-commit",
+  "branch": "claude/qgis-connection-f30fbf",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/DECISIONS.md",
+    "scripts/us-fiber-network/README.md",
+    "scripts/us-fiber-network/sources/arcgis_fiber.py",
+    "scripts/us-fiber-network/sources/carrier_maps.py",
+    "scripts/us-fiber-network/sources/publishers.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 110,
+    "cache_creation_tokens": 184014,
+    "cache_read_tokens": 8191976,
+    "output_tokens": 37088,
+    "api_call_count": 55
+  }
+}

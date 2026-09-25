@@ -1,0 +1,5 @@
+connect to qgis
+
+---
+
+i need you to look into infrapedia's terrestrial network source and find sources from that source to map out terrestrial lines for connecticut and ohklahoma

@@ -1,0 +1,51 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M3BBZVAG4AP90J2TFG3W2X0F",
+  "session_id": "9b308470-6e25-40bc-8ade-83642409bb1f",
+  "strategy": "manual-commit",
+  "created_at": "2026-09-25T04:08:20.6570784Z",
+  "branch": "claude/qgis-connection-f30fbf",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/DECISIONS.md",
+    "scripts/us-fiber-network/README.md",
+    "scripts/us-fiber-network/sources/arcgis_fiber.py",
+    "scripts/us-fiber-network/sources/carrier_maps.py",
+    "scripts/us-fiber-network/sources/publishers.py"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "c43ad1975d59",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 110,
+    "cache_creation_tokens": 184014,
+    "cache_read_tokens": 8191976,
+    "output_tokens": 37088,
+    "api_call_count": 55
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-09-25T04:08:20.4732045Z",
+    "agent_lines": 69,
+    "agent_removed": 3,
+    "human_added": 3,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 72,
+    "total_lines_changed": 77,
+    "agent_percentage": 93.5064935064935,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
