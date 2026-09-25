@@ -88,6 +88,13 @@ operator's own website map:
     fiber map is a 2018 JPG, FirstLight's site blocks automated access, and
     Crown Castle publishes no map of its own (the public copies are other
     agencies', valid only in their own states).
+- **Approximate, traced from an image (separate from the route data):** CEN's
+  fiber map is only a 2018 JPG, so
+  [`tools/trace_cen_image.py`](tools/trace_cen_image.py) georeferences it
+  (fitting the real coastline and interstates) and vectorizes the blue fiber into
+  `sources/static/cen_ct_traced_2018.geojson` (2,750 lines, ~170 m/px, off
+  by up to ~1–2 km in places). It is **not** merged into the state layers or
+  the route build.
 - **Not traceable** (static image/PDF only, sales-gated, or no public map):
   WOW Business, Cox (own site; see ODOT above), Charter/Spectrum, Crown Castle/Lightower, ExteNet, Zayo,
   Arcadian Infracom, MOX, Transtelco, EarthLink, Edison Carrier Solutions, 123NET,
