@@ -64,8 +64,26 @@ operator's own website map:
   MassBroadband 123 (MA). Dakota Carrier Network's "interactive" map is an
   unreferenced SVG drawing, Midco's GIS server needs a login, and CEN (CT), OpenCape (MA),
   NYSERNet, NJEdge and OneNet (OK) publish no route data.
+- **Connecticut / Oklahoma follow-up** (searched ArcGIS inside each state for
+  layers naming Infrapedia's operators, whatever the title says):
+  - **Cox** (and OK co-ops/rural telcos), via **Oklahoma DOT's** "Broadband
+    Lines" layer: route files providers submitted for state ARPA grant
+    compliance, combined by ODOT. Downloaded with a row filter
+    (`carrier_maps.LAYER_WHERE`) that drops one provider's conduit/civil copies
+    and drops, wireless backhaul and "Proposed" rows. A middle-mile route
+    stored once per co-applicant is collapsed to one copy.
+  - **City of Owasso, OK** fiber, already in the catalog but excluded as an
+    anonymous account. The account runs Owasso's city web maps, so it's now
+    a hand-checked override.
+  - **Internet2** ("university-corporation-for-internet-development") was
+    checked and **not** used: its map's segments are straight city-to-city
+    lines (NY–Hartford, Dallas–Tulsa–KC), not routes.
+  - **Found, not used:** a 2012 statewide Fibertech (now Crown Castle) KML of
+    Connecticut, shared by a personal ArcGIS account (it belongs to someone in
+    CT state IT, going by its Nutmeg Network maps) with no agency org.
+    That fails both the provenance rule and the Crown Castle rule.
 - **Not traceable** (static image/PDF only, sales-gated, or no public map):
-  WOW Business, Cox, Charter/Spectrum, Crown Castle/Lightower, ExteNet, Zayo,
+  WOW Business, Cox (own site; see ODOT above), Charter/Spectrum, Crown Castle/Lightower, ExteNet, Zayo,
   Arcadian Infracom, MOX, Transtelco, EarthLink, Edison Carrier Solutions, 123NET,
   Windstream's old KMZ page (now a 404).
 - **Considered and skipped (Vy's call):** BLM's national right-of-way layer

@@ -29,6 +29,7 @@ KCMO_BASIS = "public agency server (mapd.kcmo.org, City of Kansas City, MO)"
 NTIA_MM = ("https://utility.arcgis.com/usrsvcs/servers/53d104cecb964033a75c5cd05cab3657/rest/services/"
            "MM_Dashboard_Layers_ForPublic/FeatureServer")
 NTIA_BASIS = "federal agency: NTIA's public Middle Mile dashboard layers (NBAM org)"
+ODOT_LINES = "https://services6.arcgis.com/RBtoEUQ2lmN0K3GY/arcgis/rest/services/Broadband_Lines/FeatureServer/0"
 
 # (layer_url, dataset title, publisher, publisher_type, basis, status_guess)
 SEED_LAYERS = [
@@ -58,7 +59,29 @@ SEED_LAYERS = [
     ("https://services1.arcgis.com/dKlvxNSUvl36IGMp/arcgis/rest/services/Anaconda_Butte_Broadband_Routes/FeatureServer/0",
      "MDT Anaconda-Butte broadband routes", "Montana Department of Transportation", "public",
      "public agency ArcGIS org (Montana DOT)", "existing"),
+    # Oklahoma DOT combines the route files broadband providers submitted for
+    # state (ARPA/SLFRF) grant compliance: Cox (an Infrapedia network with no
+    # public map of its own), electric co-ops and rural telcos. See ODOT_WHERE.
+    (ODOT_LINES, "ODOT provider-submitted broadband lines", "Oklahoma Department of Transportation",
+     "public", "public agency ArcGIS org (OKDOT_GIS): 'Data provided by Broadband service "
+     "providers and combined by ODOT'", "existing"),
 ]
+
+# Per-layer row filters applied when a seeded layer is downloaded.
+# ODOT's layer mixes in things that aren't fiber routes: one provider's
+# conduit/civil/path copies of its own cable routes and its service drops, a
+# few wireless-backhaul links, and routes still marked "Proposed".
+LAYER_WHERE = {
+    ODOT_LINES: ("(FileName IS NULL OR (FileName NOT LIKE '%DROP%' AND FileName NOT LIKE 'Civil%' "
+                 "AND FileName NOT LIKE 'Conduit%' AND FileName NOT LIKE 'Path%' "
+                 "AND FileName NOT LIKE 'Underground path%')) "
+                 "AND (Type IS NULL OR Type <> 'Wireless Backhaul') "
+                 "AND (STATUS IS NULL OR STATUS <> 'Proposed')"),
+}
+# Layers where the same line is stored once per co-applicant (ODOT repeats one
+# shared middle-mile route for each of the eight companies on the grant), so
+# exact duplicate geometries are collapsed to one feature.
+DEDUPE_GEOMETRY = {ODOT_LINES}
 
 # FDOT District 7's Tampa Westshore Interchange project publishes the surveyed
 # existing utilities in its corridor, one layer per owner (UTEXRD_<OWNER>_<date>).
@@ -104,7 +127,8 @@ def seed_rows() -> list[dict]:
     for url, title, pub, ptype, basis, status in SEED_LAYERS + _fdot_d7_rows():
         try:
             info = get_json(url)
-            count = get_json(f"{url}/query", {"where": "1=1", "returnCountOnly": "true"}).get("count", 0)
+            count = get_json(f"{url}/query", {"where": LAYER_WHERE.get(url, "1=1"),
+                                              "returnCountOnly": "true"}).get("count", 0)
         except Exception as exc:  # noqa: BLE001 - a moved layer shouldn't break the build
             print(f"    seed unavailable: {title}: {exc}")
             continue

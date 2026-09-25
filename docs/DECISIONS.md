@@ -2,6 +2,25 @@
 
 Newest on top.
 
+## 2026-09-25 — CT/OK: ODOT provider-submitted lines added, Internet2 and Fibertech CT not
+
+- **What:** Vy asked for Connecticut and Oklahoma lines traced from Infrapedia's network
+  list. Searched ArcGIS inside each state for layers naming those operators. Added Oklahoma
+  DOT's "Broadband Lines" (Cox, electric co-ops and rural telcos, from state grant filings)
+  and the City of Owasso's fiber (a hand-checked account override). Oklahoma went from
+  23.6k to 83.6k segments.
+- **Row filter, not a whole-layer rule:** ODOT's single layer mixes real cable routes with
+  one provider's conduit/civil copies, drops, wireless links and proposed routes, so seeded
+  layers can now carry a `where` clause (`carrier_maps.LAYER_WHERE`) and opt into
+  exact-geometry de-duplication (the same route is stored once per grant co-applicant).
+- **Internet2 not added:** its published map geometry is straight two-point lines between
+  cities, so it isn't route data. (The thesis log had described it as "traced"; corrected there.)
+- **Fibertech CT 2012 KML left out, pending Vy:** ~5,000 km statewide, but shared by a
+  personal account with no org, and Fibertech is now Crown Castle. It fails both rules as written.
+- **Thesis file updated in place** (only OK plus border pieces in MO/AR/KS) instead of a
+  full rebuild. Those states have no hand-verified features, so the result matches what
+  `--by-state` plus the merge would produce. The old layers were backed up next to it.
+
 ## 2026-09-24 — Regional gap-filling: per-state discovery, agency copies of Lumen/Zayo/Crown allowed, BLM skipped
 
 - **Per-state discovery.** ArcGIS search stops at 1,000 results per query, so the
