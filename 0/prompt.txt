@@ -1,1 +1,5 @@
 connect with qgis port 9876
+
+---
+
+can you take a look at the states of wyoming and idaho. this map is mapping out the terrestrial networks of the us state by state. i feel like wyoming and idaho are missing some lines. i used infrapedia as a source to map these. it cant be directly sourceable, but infrapedia sources from third parties that are sourcable. can you data spurce the terrestrial networks for those two states from infrapedias source, and you might have to go through multiple different sources from the internet to find what you need. and can you add any data with the coresponding state layers
