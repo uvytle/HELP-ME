@@ -125,6 +125,14 @@ operator's own website map:
   `sources/static/cen_ct_traced_2018.geojson` (2,750 lines, ~170 m/px, off
   by up to ~1–2 km in places). It is **not** merged into the state layers or
   the route build.
+- **Modeled Idaho/Wyoming long-haul (separate from the route data):** Vy
+  supplied two reference map screenshots showing long-haul routes that no
+  public dataset has. [`tools/infer_idwy_routes.py`](tools/infer_idwy_routes.py)
+  lists each route as the towns it passes, draws it along OSM roads (public
+  OSRM router), and extends each border end to the nearest line in the
+  neighbouring state's layer. 8 routes, ~2,850 km. The output goes to the
+  thesis folder only (`idwy_inferred_routes_approx_2026-09.gpkg`), is not
+  committed here, and is not merged into the state layers.
 - **Not traceable** (static image/PDF only, sales-gated, or no public map):
   WOW Business, Cox (own site; see ODOT above), Charter/Spectrum, Crown Castle/Lightower, ExteNet, Zayo,
   Arcadian Infracom, MOX, Transtelco, EarthLink, Edison Carrier Solutions, 123NET,
