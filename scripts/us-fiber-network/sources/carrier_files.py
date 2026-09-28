@@ -11,6 +11,9 @@ US network list to each carrier's own website map.
 - Southern Telecom: GeoPDF network maps from southern-telecom.com, extracted
   once by tools/extract_geopdf.py into a committed GeoJSON (the pip GDAL has
   no PDF driver).
+- Pilot Fiber (NYC): a KMZ shared on ArcGIS by the carrier's own account.
+- WEBMAP_COLLECTIONS: line layers saved inside ArcGIS web maps rather than as
+  services (NYC's record of Verizon micro-trenching).
 """
 
 from __future__ import annotations
@@ -58,6 +61,20 @@ KMZ_SOURCES = [
     ("Massachusetts Broadband Institute", "public",
      "broadband.masstech.org MassBroadband 123 Maps & Data (Jan 2014, via Internet Archive)",
      [MB123], r"^(Operational|Accepted|Final Review) Fiber$"),
+    # Pilot Fiber (NYC): a KMZ of its network shared publicly on ArcGIS by a
+    # pilotfiber.com account, i.e. the carrier's own file (July 2020).
+    ("Pilot Fiber", "carrier", "ArcGIS item 'Pilot_Fiber_20200707' (owner kpittman@pilotfiber.com)",
+     ["https://www.arcgis.com/sharing/rest/content/items/3dbdd2ac54b747ceb2883303f74c245e/data"], ALL_LINES),
+]
+
+# Line layers stored inside ArcGIS web maps as feature collections (no service
+# URL), as (item id, layer title, publisher, publisher_type, basis, dataset title).
+WEBMAP_COLLECTIONS = [
+    # NYC's telecom franchise staff (DoITT, now OTI; the account also holds the
+    # city's CityBridge/LinkNYC and FiOS build-verification maps) mapping Verizon's
+    # micro-trenched fiber from permit records (Oct 2018).
+    ("f5fde963e3d84ed8a628c27930d2b28f", "MapMT_VZ_Polylines 10262018", "NYC DoITT / OTI (telecom franchise staff)",
+     "public", "city franchise staff account (pmcnicholas; hand-checked)", "NYC record of Verizon micro-trenched fiber"),
 ]
 SOUTHERN_TELECOM = Path(__file__).parent / "static" / "southern_telecom_geopdf.geojson"
 
@@ -85,7 +102,10 @@ def fetch_kmz() -> gpd.GeoDataFrame:
     with tempfile.TemporaryDirectory() as tmp:
         for publisher, ptype, page, urls, keep_layers in KMZ_SOURCES:
             for url in urls:
-                path = Path(tmp) / url.rsplit("/", 1)[1]
+                name = url.rsplit("/", 1)[1]
+                if name == "data":  # an ArcGIS item download: .../items/<id>/data
+                    name = url.rsplit("/", 2)[1] + ".kmz"
+                path = Path(tmp) / name
                 path.write_bytes(SESSION.get(url, timeout=120).content)
                 if path.suffix == ".zip":  # a KMZ shipped inside a zip
                     with zipfile.ZipFile(path) as zf:
@@ -115,9 +135,31 @@ def fetch_southern_telecom() -> gpd.GeoDataFrame:
     return out
 
 
+def fetch_webmap_collections() -> gpd.GeoDataFrame:
+    from shapely.geometry import MultiLineString
+    frames = []
+    for item_id, layer_title, publisher, ptype, basis, title in WEBMAP_COLLECTIONS:
+        url = f"https://www.arcgis.com/sharing/rest/content/items/{item_id}/data"
+        data = SESSION.get(url, params={"f": "json"}, timeout=120).json()
+        for op in data.get("operationalLayers", []):
+            for fl in (op.get("featureCollection") or {}).get("layers", []):
+                if fl.get("layerDefinition", {}).get("name") != layer_title and op.get("title") != layer_title:
+                    continue
+                feats = fl.get("featureSet", {}).get("features", [])
+                wkid = (fl.get("featureSet", {}).get("spatialReference")
+                        or fl.get("layerDefinition", {}).get("spatialReference") or {"wkid": 102100})
+                crs = "EPSG:3857" if wkid.get("latestWkid", wkid.get("wkid")) in (102100, 3857) else f"EPSG:{wkid['wkid']}"
+                geoms = [MultiLineString(f["geometry"]["paths"]) for f in feats if f.get("geometry", {}).get("paths")]
+                attrs = [f.get("attributes", {}) for f in feats if f.get("geometry", {}).get("paths")]
+                gdf = gpd.GeoDataFrame(pd.DataFrame(attrs), geometry=geoms, crs=crs).to_crs("EPSG:4326")
+                frames.append(_frame(gdf, publisher, title, f"https://www.arcgis.com/home/item.html?id={item_id}",
+                                     basis, ptype))
+    return gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs="EPSG:4326")
+
+
 def fetch() -> gpd.GeoDataFrame:
     frames = []
-    for fn in (fetch_kmz, fetch_southern_telecom):
+    for fn in (fetch_kmz, fetch_southern_telecom, fetch_webmap_collections):
         try:
             frames.append(fn())
             print(f"  {fn.__name__}: {len(frames[-1]):,} features")

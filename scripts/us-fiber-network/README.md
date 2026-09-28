@@ -118,6 +118,23 @@ operator's own website map:
     of IRON, Ziply, Lumen and Fatbeam routes (consultants), an anonymous
     `dfiedler` account aggregating Fatbeam/LS Networks, and token-gated city
     fiber (Lewiston, Moscow, Ammon, Idaho Falls, Cable One's RDOF server).
+- **NY / NJ / MA / NH follow-up** (in-state search for any telecom-ish title,
+  then probing each of ~470 items for real line layers): **Pilot Fiber**'s own
+  NYC network KMZ (shared by a pilotfiber.com account), **NYC DoITT/OTI**'s
+  record of Verizon micro-trenched fiber (a feature collection inside a web
+  map; `carrier_files.WEBMAP_COLLECTIONS`), **OpenCape** via the Cape Cod
+  Commission, Montclair State, Stoughton, North Reading, Pittsfield, Exeter NH,
+  Uniti's Buffalo–Albany conduit, Empire State Development (Syracuse) and
+  NITTEC. **Not usable:** a 37k-line Lightpath and a Crown Castle Westchester
+  layer in a drone-survey company's account (third-party copies); NYC's ECS
+  conduit data (neighbourhood totals only, no routes); Newark's fiber server
+  (offline); FirstLight/segTEL's map (an image); NYSDOT, MassDOT, NJDOT and
+  NHDOT publish no fiber layers.
+- **Modeled NY / NJ / NH long-haul and NYC trunks** (Vy's reference images,
+  [`tools/infer_ne_routes.py`](tools/infer_ne_routes.py)): 55 routes, ~2,070 km,
+  same method as ID/WY. Streets use OSRM's foot profile, highways the car
+  profile, and river crossings are straight. Out-and-back spurs from off-road
+  waypoints are cut (`drop_spurs`). Only trunks are drawn in the dense cores.
 - **Approximate, traced from an image (separate from the route data):** CEN's
   fiber map is only a 2018 JPG, so
   [`tools/trace_cen_image.py`](tools/trace_cen_image.py) georeferences it

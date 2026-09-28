@@ -2,6 +2,27 @@
 
 Newest on top.
 
+## 2026-09-28 — NY/NJ/NH/MA: scraped where possible, NYC/NJ/NH long-haul modeled from images
+
+- **What:** Vy found NYC, Jersey City and the MA–NH connections thin compared with her
+  reference map, and asked for data sourcing, with the reference images as a fallback.
+  The scraping added real data: Pilot Fiber's NYC network, NYC DoITT's record of
+  Verizon micro-trenching, OpenCape (Cape Cod Commission), Montclair State, four MA/NH
+  towns, Uniti's Buffalo–Albany conduit, ESD Syracuse and NITTEC. The carriers that make
+  up most of the reference (Crown Castle/Lightower, Zenfi, Lightpath, FirstLight/segTEL,
+  Zayo) publish no routes, so 55 routes were modeled from the images, as for ID/WY.
+- **Judgment calls:** Pilot's KMZ was accepted as the carrier's own file (a pilotfiber.com
+  account, like the Otelco precedent). The `pmcnicholas` account was accepted as NYC
+  franchise staff: it holds the city's CityBridge/LinkNYC, FiOS build-verification and
+  cable-franchise maps. A drone-survey company's Lightpath and Crown Castle layers were
+  left out as third-party copies. "Milford" is Milford, CT, not MA.
+- **Modeled scope:** in Manhattan/Jersey City/downtown Brooklyn only the trunks were drawn
+  (avenues, crosstown streets, river crossings), not the block-level laterals, which would
+  be invented detail. NH routes run into Boston rather than stopping at the state line,
+  because northeastern MA has no published lines to join and the reference continues there.
+- **Merged into the thesis state layers** with the same `origin` = "MODELED ..." tag and
+  the layer's normal style (Vy's preference). Backup: `state_fiber_networks_2026-09_backup_pre_ne.gpkg`.
+
 ## 2026-09-28 — ID/WY long-haul modeled from Vy's reference images, drawn on roads
 
 - **What:** Vy supplied two screenshots of a regional fiber map and asked for inferred

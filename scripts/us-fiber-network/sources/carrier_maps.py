@@ -122,6 +122,37 @@ SEED_LAYERS = [
      "public university ArcGIS org (Boise State Facilities)", "existing"),
     *[(f"{LCSC}/{i}", f"Lewis-Clark State College {name}", "Lewis-Clark State College", "public",
        "public college ArcGIS org (LCSC)", "existing") for i, name in [(5, "buried fiber"), (4, "aerial fiber")]],
+    # NY/NJ/MA/NH follow-up (Vy: NYC/Jersey City thin, MA-NH connections missing).
+    # Found by an in-state search for any telecom-ish title, then probing each item
+    # for real line layers.
+    ("https://services9.arcgis.com/QHXEWAb0pE2rvfbb/arcgis/rest/services/TelecomSurvey2003_Fiber/FeatureServer/0",
+     "Montclair State University campus fiber", "Montclair State University", "public",
+     "public university ArcGIS org (Montclair State University)", "existing"),
+    # OpenCape (Cape Cod's middle-mile network, which publishes no map itself),
+    # from the Cape Cod Commission's regional GIS.
+    ("https://services1.arcgis.com/Cx6nu3bxRHgwsm05/arcgis/rest/services/OpenCape_Network_2014_stpm/FeatureServer/0",
+     "OpenCape network (2014)", "Cape Cod Commission", "public",
+     "regional planning agency ArcGIS org (Cape Cod Commission)", "existing"),
+    ("https://services.arcgis.com/tZM2WSxWoRdvC6bE/arcgis/rest/services/Stoughton_Fiber_Map_2023_WFL1/FeatureServer/3",
+     "Town of Stoughton fiber runs", "Town of Stoughton, MA", "public",
+     "town GIS account (lstoughton; holds only Stoughton town layers; hand-checked)", "existing"),
+    ("https://services5.arcgis.com/HrhX0iZc4Ri8HVtK/arcgis/rest/services/Fiber_Wire/FeatureServer/0",
+     "Town of North Reading fiber", "Town of North Reading, MA", "public",
+     "town staff account (northreadingma.gov)", "existing"),
+    ("https://services3.arcgis.com/FvqmbdgeOdN6wKrI/arcgis/rest/services/FiberRun/FeatureServer/0",
+     "City of Pittsfield fiber runs", "City of Pittsfield, MA", "public",
+     "city GIS account (pittsfieldgis; hand-checked)", "existing"),
+    ("https://services3.arcgis.com/cHo6lWi6TaNLOCc4/arcgis/rest/services/Town_Fiber/FeatureServer/0",
+     "Town of Exeter fiber", "Town of Exeter, NH", "public", "town staff account (exeternh.gov)", "existing"),
+    # Uniti's own account (the one behind its dark fiber map, e0187455).
+    (f"{UNITI}/Conduit____Buffalo___Albany/FeatureServer/19", "Uniti conduit, Buffalo - Albany", "Uniti",
+     "carrier", "carrier's own ArcGIS account (same owner as Uniti Wholesale Dark Fiber)", "existing"),
+    ("https://services8.arcgis.com/c8XMnzAXvS7OB2eQ/arcgis/rest/services/SyracuseFiber/FeatureServer/0",
+     "Empire State Development Syracuse fiber", "Empire State Development", "public",
+     "state agency ArcGIS org (Empire State Development)", "existing"),
+    ("https://services5.arcgis.com/MwmtLsRLaseqMSiI/arcgis/rest/services/FiberOpticLines/FeatureServer/1",
+     "NITTEC fiber optic lines", "NITTEC (Niagara Frontier transportation agencies)", "public",
+     "regional transportation coalition staff account (Beth.Clark_NITTEC; hand-checked)", "existing"),
 ]
 
 # Per-layer row filters applied when a seeded layer is downloaded.
