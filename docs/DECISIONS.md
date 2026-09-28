@@ -18,7 +18,7 @@ Newest on top.
   of I-80 near Rock Springs that no road matches.
 - **Then merged into the state layers (Vy's request, same day):** the thesis Idaho/Wyoming
   layers now carry the 8 routes too, tagged `origin` = "MODELED ..." / `publisher_type` =
-  "modeled" and drawn dashed by a rule-based style. They're still not part of the build's
+  "modeled", styled like the rest of the layer (Vy wanted one consistent look per state). They're still not part of the build's
   route data, so a future `--by-state` refresh of those layers must re-add them (the
   source gpkg is kept).
 - **Originally kept apart, like CEN:** "MODELED / approximate", as separate dashed layers. The geometry stays in the thesis folder, not this public repo, because it's
