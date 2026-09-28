@@ -345,6 +345,8 @@ def _fetch_one(row: dict) -> gpd.GeoDataFrame | None:
         return None
     if row["layer_url"] in carrier_maps.DEDUPE_GEOMETRY:
         gdf = gdf[~gdf.geometry.to_wkb().duplicated()]
+    if row["layer_url"] in carrier_maps.LAYER_CLEAN:
+        gdf = carrier_maps.LAYER_CLEAN[row["layer_url"]](gdf)
     attr_cols = [c for c in gdf.columns if c != "geometry"]
     attrs = gdf[attr_cols].astype(object).where(gdf[attr_cols].notna(), None)
     return gpd.GeoDataFrame({

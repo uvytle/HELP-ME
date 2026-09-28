@@ -88,6 +88,36 @@ operator's own website map:
     fiber map is a 2018 JPG, FirstLight's site blocks automated access, and
     Crown Castle publishes no map of its own (the public copies are other
     agencies', valid only in their own states).
+- **Idaho / Wyoming follow-up** (every telecom-ish item inside each state:
+  fiber, broadband, middle mile, ITS, conduit, operator names; plus each
+  agency's own GIS server). Idaho went from 6,898 to 15,331 segments (~3,300 →
+  ~8,800 km):
+  - **Syringa Networks** (Idaho's regional carrier; its website has no map):
+    its full network KMZ, published in the ArcGIS org of ATC Communications,
+    one of Syringa's member-owner telcos. Vy chose to include owned *and*
+    leased fiber (~2,100 + ~2,400 km in Idaho). Conduit-only, bare strand,
+    microwave and abandoned folders are filtered out, and route names/popups
+    (which name customers) are dropped: only ownership, placement,
+    designation and strand count are kept (`carrier_maps._clean_syringa`).
+    Its Utah folders are left out, because they're largely fiber leased from
+    UDOT and would displace UDOT's own copy (~27k segments) in the de-duplication.
+  - **Idaho Transportation Department**: statewide ITS fiber and conduit on
+    its public server (`gis.itd.idaho.gov/.../Fiber/ITD_FIBER`).
+  - **Ada County Highway District** signal-interconnect conduit, the **State
+    of Idaho**'s middle-mile grant projects (IBAB/CPF/Idaho Broadband Fund;
+    fixed-wireless one dropped), **McCall** IT conduit, **City of Eagle**'s
+    survey of Fatbeam's conduit, **Mountain Home**'s fiber LID (the
+    "FiberCity1" account shares the city's ArcGIS org), **Boise State** and
+    **Lewis-Clark State College** campus fiber.
+  - **Wyoming, nothing new usable** (one Syringa route crosses in from Idaho):
+    WYDOT's public servers have no fiber layers, WyGISC's (UW) broadband
+    provider layers need a login, and Visionary, Silver Star, TCT and
+    Wyoming.com publish no route maps. Wyoming's long-haul fiber is mostly
+    Lumen/Zayo/AT&T along I-80 and I-25, which fall under the carrier rule.
+  - **Found, not used:** J-U-B Engineers' and David Evans & Associates' copies
+    of IRON, Ziply, Lumen and Fatbeam routes (consultants), an anonymous
+    `dfiedler` account aggregating Fatbeam/LS Networks, and token-gated city
+    fiber (Lewiston, Moscow, Ammon, Idaho Falls, Cable One's RDOF server).
 - **Approximate, traced from an image (separate from the route data):** CEN's
   fiber map is only a 2018 JPG, so
   [`tools/trace_cen_image.py`](tools/trace_cen_image.py) georeferences it
