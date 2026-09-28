@@ -7,3 +7,7 @@ can you take a look at the states of wyoming and idaho. this map is mapping out 
 ---
 
 look at these as references for wyoming and idaho and trace inferred lines. its okay if its not as accurate just make sure formally it matches and it conencts to adjacent state lines
+
+---
+
+can you merge the new added lines to corresponding state layers
