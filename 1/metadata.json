@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M3MJQM9TE5M4DJDCSJVPEN78",
+  "session_id": "e7834ee9-84f6-4fd1-966a-22e8d1805394",
+  "strategy": "manual-commit",
+  "created_at": "2026-09-28T17:59:23.5624241Z",
+  "branch": "claude/qgis-port-9876-connect-b1023a",
+  "checkpoints_count": 1,
+  "save_step_count": 1,
+  "files_touched": [
+    "docs/DECISIONS.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "7f8f39bc223e",
+  "session_metrics": {
+    "turn_count": 10
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-09-28T17:59:23.5463369Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 181,
+    "human_modified": 102,
+    "human_removed": 0,
+    "total_committed": 283,
+    "total_lines_changed": 284,
+    "agent_percentage": 0,
+    "metric_version": 2
+  }
+}
