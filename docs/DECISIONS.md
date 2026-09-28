@@ -2,6 +2,31 @@
 
 Newest on top.
 
+## 2026-09-28 — Idaho/Wyoming: Syringa included (owned + leased), Wyoming has nothing public
+
+- **What:** Vy felt Idaho and Wyoming were missing lines compared with Infrapedia. A
+  broader in-state ArcGIS search (ITS, conduit, middle mile, operator names, not just
+  "fiber") plus agency GIS servers turned up 11 new Idaho layers. Idaho went 6,898 →
+  15,331 segments. Wyoming stayed at 272.
+- **Syringa (Vy's call):** Syringa's full network KMZ is public in ATC Communications'
+  ArcGIS org. ATC is a Syringa member-owner, so it's treated as the carrier publishing
+  its own network, unlike `geocode_Zayo`, which has no org. It looks internal (strand
+  counts, customer names), so Vy was asked. She chose owned + leased fiber. Customer-bearing
+  fields are dropped on download.
+- **Syringa's Utah folders left out:** mostly fiber leased from UDOT. As a carrier copy,
+  it outranks UDOT in the cross-dataset de-duplication and would have replaced ~27k UDOT
+  segments with Syringa's copy of the same routes.
+- **Mountain Home's "FiberCity1" account is now accepted** (seeded): it's in the same
+  ArcGIS org as `cityofmountainhome` and holds only the city's fiber-district layers.
+- **Wyoming:** WYDOT publishes no fiber, the UW/WyGISC broadband provider layers are
+  login-only, and the regional carriers publish no maps. What Infrapedia shows there is
+  mostly Lumen/Zayo long-haul, which the carrier rule excludes.
+- **Thesis file updated in place** (Idaho and Wyoming layers only; neither has verified
+  features), with the old layers backed up to `state_fiber_networks_2026-09_backup_pre_idwy.gpkg`.
+  In a full split, Washington also changes: 190 Syringa segments into Spokane replace
+  332 NoaNet segments on the same routes (carrier copy outranks public). That wasn't
+  pushed to the thesis file.
+
 ## 2026-09-25 — CEN's Connecticut map traced from an image, kept as a separate "approximate" layer
 
 - **What:** Vy asked to trace CEN's fiber map (its only public form is a 2018 JPG). It's

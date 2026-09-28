@@ -145,6 +145,7 @@ JURISDICTION = {
     "Montgomery County, MD": "MD", "City of Philadelphia": "PA", "City of Boston": "MA",
     "Arizona State Land Department": "AZ", "Makah Tribe": "WA", "College of William & Mary": "VA",
     "Town of Milford": "CT", "Florida DOT District 7 (Westshore Interchange project)": "FL",
+    "Idaho Transportation Department": "ID",
 }
 
 
