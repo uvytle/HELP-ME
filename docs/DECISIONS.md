@@ -2,6 +2,24 @@
 
 Newest on top.
 
+## 2026-09-28 — ID/WY long-haul modeled from Vy's reference images, drawn on roads
+
+- **What:** Vy supplied two screenshots of a regional fiber map and asked for inferred
+  lines that formally match it and connect to the neighbouring states. The routes are
+  read as town sequences and drawn along OSM roads with the public OSRM router
+  (`tools/infer_idwy_routes.py`). The alternative was georeferencing and vectorizing the
+  screenshots like CEN's. That was ruled out because they're small, unlabelled crops, and
+  road routing gives the same shape with better position (fiber here follows highways).
+- **Connections:** each border end is extended to the nearest line in the adjacent state's
+  layer. In Montana that means following the highway to Vision Net's line (St. Regis,
+  Noxon, Laurel), which is what the reference shows. Hand-set waypoints keep the router on
+  the drawn corridor (Big Trails on the Nowood Road, not the Thermopolis detour). The
+  Sheridan stub was skipped (a dead end in the image), and so was a parallel strand south
+  of I-80 near Rock Springs that no road matches.
+- **Kept apart, like CEN:** "MODELED / approximate", as separate dashed layers under each
+  state. The geometry stays in the thesis folder, not this public repo, because it's
+  derived from someone else's map images.
+
 ## 2026-09-28 — Idaho/Wyoming: Syringa included (owned + leased), Wyoming has nothing public
 
 - **What:** Vy felt Idaho and Wyoming were missing lines compared with Infrapedia. A
