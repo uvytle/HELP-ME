@@ -204,3 +204,9 @@ Newest on top.
 - **Moved:** `ascii_network_animation.py` + `panopticon_network.gif` → `scripts/ascii-network-animation/`
   and `assets/` respectively; the GIF is now shown on the site's Projects tab as an
   example entry.
+
+## DXF → G-code pen plotter (`scripts/dxf-to-gcode/`)
+- Pen lift uses the Z axis (no servo) so the Ender 3 V3 SE needs no hardware changes.
+- Default homes X/Y only and trusts the user-set pen height (`G92 Z`), because the V3 SE
+  homes Z with its CR Touch probe, which doesn't suit a pen. `--home-z` switches to plain `G28`.
+- Uses `ezdxf` path flattening so arcs/splines/blocks all work without per-entity code.
