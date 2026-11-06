@@ -1,0 +1,1 @@
+can yourtea python code that turns a dxf file into a gcode file for my ender 3 v3 se printer. i am trying to do a pen plotter
