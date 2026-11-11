@@ -28,6 +28,12 @@ UNIT_TO_MM = {0: 1.0, 1: 25.4, 2: 304.8, 4: 1.0, 5: 10.0, 6: 1000.0, 8: 0.0254}
 # Ender 3 V3 SE bed is 220 x 220 mm.
 BED = 220.0
 
+# Where the pen tip sits relative to the nozzle (mm): 1.75" to the right (+X) and
+# 1.25" toward the front of the printer (-Y). Printer coordinates are always for the
+# nozzle, so every XY move is shifted by this offset to put the PEN where we want it.
+PEN_OFFSET_X = 1.75 * 25.4
+PEN_OFFSET_Y = -1.25 * 25.4
+
 
 def collect_polylines(msp, flatten_dist):
     """Return a list of polylines ([(x, y), ...], is_closed) in drawing units.
@@ -84,6 +90,18 @@ def order_polylines(polys, start=(0.0, 0.0)):
     return ordered
 
 
+def nozzle_xy(x, y, args):
+    """Convert a wanted pen-tip position to the nozzle position the printer must go to."""
+    return x - args.pen_offset_x, y - args.pen_offset_y
+
+
+def pen_reachable(args):
+    """(x0, y0, x1, y1) of bed positions the pen tip can reach. The nozzle can only
+    travel 0..BED, so the offset shaves strips off two sides of the bed."""
+    return (max(0.0, args.pen_offset_x), max(0.0, args.pen_offset_y),
+            min(BED, BED + args.pen_offset_x), min(BED, BED + args.pen_offset_y))
+
+
 def heaters_off(w):
     """Hotend and bed to 0 C (and fan off) so nothing warms or warps the paper."""
     w("M104 S0 ; hotend off\n")
@@ -106,7 +124,8 @@ def write_gcode(polys, args, out):
         w(f"G92 Z{args.z_up} ; ASSUMES the pen was manually lowered/raised to the pen-up height before starting\n")
     w(f"G0 Z{args.z_up} F{args.z_speed} ; pen up\n")
     if args.pause_for_paper:
-        w(f"G0 X{args.paper_x:.2f} Y{args.paper_y:.2f} F{args.travel_speed}\n")
+        px, py = nozzle_xy(args.paper_x, args.paper_y, args)
+        w(f"G0 X{px:.2f} Y{py:.2f} F{args.travel_speed}\n")
         w("M0 Load paper / check pen, then click to start\n")
 
     pen_down = False
@@ -117,13 +136,15 @@ def write_gcode(polys, args, out):
             if pen_down:
                 w(f"G0 Z{args.z_up} F{args.z_speed}\n")
                 pen_down = False
-            w(f"G0 X{x0:.3f} Y{y0:.3f} F{args.travel_speed}\n")
+            nx, ny = nozzle_xy(x0, y0, args)
+            w(f"G0 X{nx:.3f} Y{ny:.3f} F{args.travel_speed}\n")
         if not pen_down:
             w(f"G1 Z{args.z_down} F{args.z_speed}\n")
             pen_down = True
             w(f"F{args.draw_speed}\n")
         for x, y in pl[1:]:
-            w(f"G1 X{x:.3f} Y{y:.3f}\n")
+            nx, ny = nozzle_xy(x, y, args)
+            w(f"G1 X{nx:.3f} Y{ny:.3f}\n")
         pos = pl[-1]
 
     w(f"G0 Z{args.z_up} F{args.z_speed} ; pen up\n")
@@ -141,10 +162,15 @@ def main():
     ap.add_argument("--scale", type=float, default=1.0, help="extra scale factor (default 1)")
     ap.add_argument("--fit", action="store_true", help="scale down (never up) to fit the drawing area")
     ap.add_argument("--center", action="store_true", help="centre the drawing in the drawing area")
-    ap.add_argument("--origin-x", type=float, default=10.0, help="drawing area left edge, mm (default 10)")
-    ap.add_argument("--origin-y", type=float, default=10.0, help="drawing area front edge, mm (default 10)")
-    ap.add_argument("--area-w", type=float, default=200.0, help="drawing area width, mm (default 200)")
-    ap.add_argument("--area-h", type=float, default=200.0, help="drawing area height, mm (default 200)")
+    ap.add_argument("--pen-offset-x", type=float, default=PEN_OFFSET_X,
+                    help="pen tip is this many mm to the RIGHT of the nozzle (default 44.45 = 1.75in)")
+    ap.add_argument("--pen-offset-y", type=float, default=PEN_OFFSET_Y,
+                    help="pen tip is this many mm BEHIND the nozzle; negative = toward the front "
+                         "(default -31.75 = 1.25in toward the front)")
+    ap.add_argument("--origin-x", type=float, help="drawing area left edge, mm (default: reachable area + 5)")
+    ap.add_argument("--origin-y", type=float, help="drawing area front edge, mm (default: reachable area + 5)")
+    ap.add_argument("--area-w", type=float, help="drawing area width, mm (default: reachable area - 10)")
+    ap.add_argument("--area-h", type=float, help="drawing area height, mm (default: reachable area - 10)")
     ap.add_argument("--z-up", type=float, default=5.0, help="Z with pen lifted (default 5)")
     ap.add_argument("--z-down", type=float, default=0.0,
                     help="Z with pen touching paper (default 0; tune by a fraction of a mm, negative = press harder)")
@@ -176,6 +202,17 @@ def main():
     if args.flip_y:
         polys = [([(x, -y) for x, y in pl], c) for pl, c in polys]
 
+    rx0, ry0, rx1, ry1 = pen_reachable(args)
+    margin = 5.0
+    if args.origin_x is None:
+        args.origin_x = rx0 + margin
+    if args.origin_y is None:
+        args.origin_y = ry0 + margin
+    if args.area_w is None:
+        args.area_w = rx1 - rx0 - 2 * margin
+    if args.area_h is None:
+        args.area_h = ry1 - ry0 - 2 * margin
+
     scale = mm_per_unit * args.scale
     minx, miny, maxx, maxy = bounds(polys)
     w, h = (maxx - minx) * scale, (maxy - miny) * scale
@@ -187,8 +224,9 @@ def main():
     polys = transform(polys, scale, ox - minx * scale, oy - miny * scale)
 
     fx0, fy0, fx1, fy1 = bounds(polys)
-    if fx0 < 0 or fy0 < 0 or fx1 > BED or fy1 > BED:
-        sys.exit(f"Drawing ({fx1 - fx0:.1f} x {fy1 - fy0:.1f} mm) does not fit the {BED:.0f} mm bed. "
+    if fx0 < rx0 - 1e-6 or fy0 < ry0 - 1e-6 or fx1 > rx1 + 1e-6 or fy1 > ry1 + 1e-6:
+        sys.exit(f"Drawing ({fx1 - fx0:.1f} x {fy1 - fy0:.1f} mm) is outside the area the pen can reach "
+                 f"(X {rx0:.1f}-{rx1:.1f}, Y {ry0:.1f}-{ry1:.1f} mm, because of the pen offset). "
                  "Use --fit or --scale.")
 
     polys = order_polylines(polys)
@@ -196,6 +234,7 @@ def main():
     with open(out_path, "w", newline="\n") as f:
         write_gcode(polys, args, f)
 
+    print(f"Pen can reach X {rx0:.1f}-{rx1:.1f}, Y {ry0:.1f}-{ry1:.1f} mm (offset X{args.pen_offset_x:+.2f} Y{args.pen_offset_y:+.2f})")
     print(f"Wrote {out_path}: {len(polys)} strokes, drawing {fx1 - fx0:.1f} x {fy1 - fy0:.1f} mm "
           f"at X{fx0:.1f}-{fx1:.1f} Y{fy0:.1f}-{fy1:.1f}")
 
