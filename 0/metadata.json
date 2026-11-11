@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M76865SSTKEA4YKZ8X6RMBGF",
+  "session_id": "f9b2e7f7-2abc-49c4-a321-f351d96ea344",
+  "strategy": "manual-commit",
+  "created_at": "2026-11-11T21:28:28.4867081Z",
+  "branch": "claude/pen-plotter-z-heights",
+  "checkpoints_count": 1,
+  "files_touched": [],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5-5",
+  "turn_id": "188e0000d721",
+  "checkpoint_transcript_start": 359,
+  "transcript_lines_at_start": 359,
+  "compact_transcript_start": 42,
+  "token_usage": {
+    "input_tokens": 12,
+    "cache_creation_tokens": 6081,
+    "cache_read_tokens": 540500,
+    "output_tokens": 3586,
+    "api_call_count": 5
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
