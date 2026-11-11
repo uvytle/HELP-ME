@@ -12,7 +12,7 @@ python dxf_to_gcode.py drawing.dxf --fit --center
 
 That writes `drawing.gcode` next to the DXF. Copy it to the printer's SD card and print it.
 Useful options: `--z-down`, `--z-up`, `--draw-speed`, `--units`, `--flip-y`,
-`--pause-for-paper`, `--home-z` (see `--help`).
+`--pause-for-paper`, `--manual-z` (see `--help`).
 
 ## What it handles
 LINE, ARC, CIRCLE, ELLIPSE, SPLINE, LWPOLYLINE/POLYLINE (incl. arc bulges), and blocks
@@ -23,9 +23,14 @@ Layers/colors are ignored: everything is drawn with one pen.
 ## Pen setup (do this once)
 1. Mount the pen so the tip is a few mm below where the nozzle tip was, spring-loaded if possible.
 2. Remove/raise nothing else; heaters are turned off by the G-code.
-3. By default the script homes **X/Y only** and treats the Z height at start as pen-up (`Z5`),
-   because the V3 SE homes Z with the CR Touch probe, which isn't meant for a pen. Before
-   starting: use the printer menu to move Z so the pen is ~5 mm above the paper, then start.
-   Tune `--z-down` (default `0` = 5 mm lower than start) until the pen just touches; negative
-   values press harder. Or pass `--home-z` to use a normal `G28` instead.
-4. Tape the paper down. The default drawing area is X/Y 10–210 mm of the 220 mm bed.
+3. **Z heights.** The script does a normal `G28` (the CR Touch probes the bed centre), then
+   uses Z = **14.0 mm** with the pen on the paper (work) and **17.0 mm** with it lifted
+   (travel). Change them with `--z-down` / `--z-up`; lower `--z-down` a fraction of a mm to
+   press harder. Make sure the pen can't hit the bed anywhere, including the probe point at
+   the bed centre. `--manual-z` homes X/Y only and treats the Z at start as the travel height.
+4. **Pen offset.** The pen sits 1.75" to the right of and 1.25" toward the front of the nozzle
+   (built in as `--pen-offset-x 44.45 --pen-offset-y -31.75`). All coordinates in the G-code
+   are shifted so the *pen* lands where the drawing says. Because the nozzle can't leave the
+   bed, the pen can only reach X 44.4–220 and Y 0–188 mm; the drawing area defaults to that
+   region minus a 5 mm margin. Measure your real offset and change the two values if it differs.
+5. Tape the paper down inside that reachable area.
