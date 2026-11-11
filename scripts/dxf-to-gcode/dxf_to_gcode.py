@@ -155,7 +155,11 @@ def write_gcode(polys, args, out):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("dxf")
+    ap.add_argument("dxf", nargs="?", help="input DXF (not needed with --perimeter)")
+    ap.add_argument("--perimeter", action="store_true",
+                    help="no DXF: draw a rectangle around the outermost area the pen can reach")
+    ap.add_argument("--perimeter-inset", type=float, default=0.0,
+                    help="pull the --perimeter rectangle in by this many mm (default 0 = the very edge)")
     ap.add_argument("-o", "--output", help="output .gcode (default: next to the DXF)")
     ap.add_argument("--units", choices=["auto", "mm", "cm", "in", "ft", "m"], default="auto",
                     help="DXF drawing units. auto = read from file, assume mm if unset")
@@ -190,6 +194,21 @@ def main():
     ap.add_argument("--flip-y", action="store_true", help="mirror Y (if your drawing comes out upside-down)")
     args = ap.parse_args()
 
+    rx0, ry0, rx1, ry1 = pen_reachable(args)
+
+    if args.perimeter:
+        i = args.perimeter_inset
+        x0, y0, x1, y1 = rx0 + i, ry0 + i, rx1 - i, ry1 - i
+        polys = [([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)], True)]
+        out_path = Path(args.output) if args.output else Path("pen_perimeter.gcode")
+        with open(out_path, "w", newline="\n") as f:
+            write_gcode(polys, args, f)
+        print(f"Wrote {out_path}: rectangle X {x0:.2f}-{x1:.2f}, Y {y0:.2f}-{y1:.2f} mm "
+              f"({x1 - x0:.1f} x {y1 - y0:.1f})")
+        return
+
+    if not args.dxf:
+        ap.error("give a DXF file, or use --perimeter")
     doc = ezdxf.readfile(args.dxf)
     if args.units == "auto":
         mm_per_unit = UNIT_TO_MM.get(doc.header.get("$INSUNITS", 0), 1.0)
@@ -203,7 +222,6 @@ def main():
     if args.flip_y:
         polys = [([(x, -y) for x, y in pl], c) for pl, c in polys]
 
-    rx0, ry0, rx1, ry1 = pen_reachable(args)
     margin = 5.0
     if args.origin_x is None:
         args.origin_x = rx0 + margin

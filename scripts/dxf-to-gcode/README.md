@@ -34,3 +34,11 @@ Layers/colors are ignored: everything is drawn with one pen.
    bed, the pen can only reach X 44.4–220 and Y 0–188 mm; the drawing area defaults to that
    region minus a 5 mm margin. Measure your real offset and change the two values if it differs.
 5. Tape the paper down inside that reachable area.
+
+## Draw the outer edge of the usable area
+```
+python dxf_to_gcode.py --perimeter
+```
+Writes `pen_perimeter.gcode`: a rectangle around the furthest the pen can reach (X 44.45–220,
+Y 0–188.25 mm with the default offset). Handy for checking paper placement and the pen offset.
+`--perimeter-inset 3` pulls it in 3 mm if the carriage bumps its limits at the very edge.
