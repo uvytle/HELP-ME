@@ -6,7 +6,7 @@ servo or extra hardware is needed. No heaters are turned on and nothing extrudes
 
 Usage:
     python dxf_to_gcode.py drawing.dxf                 # writes drawing.gcode
-    python dxf_to_gcode.py drawing.dxf -o out.gcode --fit --center
+    python dxf_to_gcode.py drawing.dxf -o out.gcode
 
 Run with --help for all options. See README.md for pen setup.
 """
@@ -250,7 +250,7 @@ def main():
     if args.flip_y:
         polys = [([(x, -y) for x, y in pl], c) for pl, c in polys]
 
-    margin = 5.0
+    margin = 0.0
     if args.origin_x is None:
         args.origin_x = rx0 + margin
     if args.origin_y is None:

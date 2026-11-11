@@ -7,10 +7,11 @@ Turns a DXF drawing into G-code for a pen plotter built on an **Ender 3 V3 SE**
 
 ```
 pip install ezdxf
-python dxf_to_gcode.py drawing.dxf --fit --center
+python dxf_to_gcode.py drawing.dxf
 ```
 
-That writes `drawing.gcode` next to the DXF. Copy it to the printer's SD card and print it.
+That writes `drawing.gcode` next to the DXF. The drawing's lower-left corner is placed at (0, 0) of the
+plate, with no fitting or centering (add `--fit` / `--center` if you want those). Copy it to the printer's SD card and print it.
 Useful options: `--z-down`, `--z-up`, `--draw-speed`, `--units`, `--flip-y`,
 `--manual-z` (see `--help`).
 
@@ -31,8 +32,8 @@ Layers/colors are ignored: everything is drawn with one pen.
 4. **Pen offset & work area.** The pen sits 1.75" right of and 1.25" toward the front of the
    nozzle, but the bed plate was moved to compensate, so the software offset is 0: the pen at
    nozzle (0, 0) is the bottom-left (0, 0) of the paper area, and the usable area is
-   **185 × 220 mm** (`--work-w`, `--work-h`). The drawing area defaults to that minus a 5 mm
-   margin. If the plate is ever moved back, use `--pen-offset-x 44.45 --pen-offset-y -31.75`.
+   **185 × 220 mm** (`--work-w`, `--work-h`). The drawing area defaults to that (no margin).
+   If the plate is ever moved back, use `--pen-offset-x 44.45 --pen-offset-y -31.75`.
 5. Tape the paper down inside that reachable area.
 
 ## Draw the outer edge of the usable area
