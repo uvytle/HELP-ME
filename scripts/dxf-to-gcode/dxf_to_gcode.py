@@ -102,6 +102,23 @@ def pen_reachable(args):
             min(BED, BED + args.pen_offset_x), min(BED, BED + args.pen_offset_y))
 
 
+def write_reference_dxf(path, rect):
+    """Reference drawing in mm, origin at the bed's front-left corner (same as the
+    pen coordinates in the G-code): the pen's drawable rectangle and the bed outline."""
+    doc = ezdxf.new("R2010")
+    doc.units = 4  # millimetres
+    doc.header["$MEASUREMENT"] = 1
+    doc.layers.add("PEN_DRAWABLE_AREA", color=1)
+    doc.layers.add("BED_220x220", color=8)
+    msp = doc.modelspace()
+    x0, y0, x1, y1 = rect
+    msp.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True,
+                       dxfattribs={"layer": "PEN_DRAWABLE_AREA"})
+    msp.add_lwpolyline([(0, 0), (BED, 0), (BED, BED), (0, BED)], close=True,
+                       dxfattribs={"layer": "BED_220x220"})
+    doc.saveas(path)
+
+
 def heaters_off(w):
     """Hotend and bed to 0 C (and fan off) so nothing warms or warps the paper."""
     w("M104 S0 ; hotend off\n")
@@ -209,6 +226,9 @@ def main():
             write_gcode(polys, args, f)
         print(f"Wrote {out_path}: rectangle X {x0:.2f}-{x1:.2f}, Y {y0:.2f}-{y1:.2f} mm "
               f"({x1 - x0:.1f} x {y1 - y0:.1f})")
+        dxf_path = out_path.with_suffix(".dxf")
+        write_reference_dxf(dxf_path, (x0, y0, x1, y1))
+        print(f"Wrote {dxf_path}: same rectangle plus the {BED:.0f} mm bed outline, in millimetres")
         return
 
     if not args.dxf:

@@ -47,3 +47,8 @@ Y 0–188.25 mm with the default offset). Handy for checking paper placement and
 Every file starts by moving the pen to the front-left corner of the reachable area, lowering it
 onto the paper, and pausing (`M0`). Use that time to change the speed % or nudge Z from the
 printer's menu, then click to start. `--no-pause` skips it.
+
+`--perimeter` also writes `pen_perimeter.dxf` (millimetres, origin at the bed's front-left corner):
+layer `PEN_DRAWABLE_AREA` is the rectangle the pen can reach, layer `BED_220x220` is the bed outline.
+Open it in CAD as a reference to place your drawing. Don't feed it back into the converter; the
+bed outline lies outside the pen's reach.
