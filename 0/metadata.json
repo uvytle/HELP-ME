@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M76782ZYDP2J62Y3VDJ7EQ6M",
+  "session_id": "f9b2e7f7-2abc-49c4-a321-f351d96ea344",
+  "strategy": "manual-commit",
+  "created_at": "2026-11-11T21:12:02.7037334Z",
+  "branch": "claude/pen-plotter-heaters-off",
+  "checkpoints_count": 1,
+  "files_touched": [],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5-5",
+  "turn_id": "311434b7c98a",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 56,
+    "cache_creation_tokens": 137609,
+    "cache_read_tokens": 1982249,
+    "output_tokens": 15387,
+    "api_call_count": 25
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
