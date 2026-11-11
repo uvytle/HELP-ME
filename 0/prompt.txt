@@ -1,0 +1,37 @@
+can yourtea python code that turns a dxf file into a gcode file for my ender 3 v3 se printer. i am trying to do a pen plotter
+
+---
+
+what do i copy to the sd card
+
+---
+
+Missing dependency. Install it with:  pip install ezdxf
+
+---
+
+what do i do after installing pip
+
+---
+
+can yourtea python code that turns a dxf file into a gcode file for my ender 3 v3 se printer. i am trying to do a pen plotter
+
+---
+
+i need to add into the code to make sure the nozzle temp and bed temp is 0 so it doesnt warp the paper
+
+---
+
+also with the pen attachment. it is 1.75" (x-axis)to theright and 1.25"(yaxis) down from the nozzle so add it into the code for offsets
+
+---
+
+you are correct
+
+---
+
+also pen down9z-work) height is 14.0mm and pen up(z-travel) is 17.0mm
+
+---
+
+with this code can you make a gcode file that draws out the outer most perimeter that i can draw in?
