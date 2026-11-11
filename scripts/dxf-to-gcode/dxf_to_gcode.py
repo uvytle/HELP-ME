@@ -116,7 +116,7 @@ def write_gcode(polys, args, out):
     w("G21 ; millimetres\n")
     w("G90 ; absolute positioning\n")
     heaters_off(w)
-    if args.home_z:
+    if not args.manual_z:
         w("G28 ; home all axes (Z uses the probe, so the bed centre is probed)\n")
     else:
         w("G28 X Y ; home X/Y only\n")
@@ -171,9 +171,9 @@ def main():
     ap.add_argument("--origin-y", type=float, help="drawing area front edge, mm (default: reachable area + 5)")
     ap.add_argument("--area-w", type=float, help="drawing area width, mm (default: reachable area - 10)")
     ap.add_argument("--area-h", type=float, help="drawing area height, mm (default: reachable area - 10)")
-    ap.add_argument("--z-up", type=float, default=5.0, help="Z with pen lifted (default 5)")
-    ap.add_argument("--z-down", type=float, default=0.0,
-                    help="Z with pen touching paper (default 0; tune by a fraction of a mm, negative = press harder)")
+    ap.add_argument("--z-up", type=float, default=17.0, help="Z travel height, pen lifted (default 17)")
+    ap.add_argument("--z-down", type=float, default=14.0,
+                    help="Z work height, pen on paper (default 14; lower it a fraction of a mm to press harder)")
     ap.add_argument("--draw-speed", type=int, default=2000, help="drawing feedrate mm/min (default 2000)")
     ap.add_argument("--travel-speed", type=int, default=6000, help="pen-up feedrate mm/min (default 6000)")
     ap.add_argument("--z-speed", type=int, default=600, help="Z feedrate mm/min (default 600)")
@@ -181,8 +181,9 @@ def main():
                     help="max curve error in mm when approximating arcs/splines (default 0.05)")
     ap.add_argument("--join-tol", type=float, default=0.05,
                     help="don't lift the pen if the next stroke starts within this many mm (default 0.05)")
-    ap.add_argument("--home-z", action="store_true",
-                    help="use full G28 (probes Z at bed centre). Default homes XY only and sets Z by hand")
+    ap.add_argument("--manual-z", action="store_true",
+                    help="home X/Y only and treat the Z height at start as --z-up (default: full G28, which "
+                         "probes Z at the bed centre)")
     ap.add_argument("--pause-for-paper", action="store_true", help="insert an M0 pause before drawing")
     ap.add_argument("--paper-x", type=float, default=110.0)
     ap.add_argument("--paper-y", type=float, default=110.0)
