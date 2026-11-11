@@ -7,6 +7,10 @@ M140 S0 ; bed off
 M107 ; fan off
 G28 ; home all axes (Z uses the probe, so the bed centre is probed)
 G0 Z17.0 F600 ; pen up
+G0 X0.000 Y31.750 F6000 ; front-left corner for setup
+G1 Z14.0 F600 ; pen down so you can check the height
+M0 Adjust speed and Z height, then click to start
+G0 Z17.0 F600 ; pen up
 G0 X0.000 Y31.750 F6000
 G1 Z14.0 F600
 F2000

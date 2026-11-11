@@ -12,7 +12,7 @@ python dxf_to_gcode.py drawing.dxf --fit --center
 
 That writes `drawing.gcode` next to the DXF. Copy it to the printer's SD card and print it.
 Useful options: `--z-down`, `--z-up`, `--draw-speed`, `--units`, `--flip-y`,
-`--pause-for-paper`, `--manual-z` (see `--help`).
+`--manual-z` (see `--help`).
 
 ## What it handles
 LINE, ARC, CIRCLE, ELLIPSE, SPLINE, LWPOLYLINE/POLYLINE (incl. arc bulges), and blocks
@@ -42,3 +42,8 @@ python dxf_to_gcode.py --perimeter
 Writes `pen_perimeter.gcode`: a rectangle around the furthest the pen can reach (X 44.45–220,
 Y 0–188.25 mm with the default offset). Handy for checking paper placement and the pen offset.
 `--perimeter-inset 3` pulls it in 3 mm if the carriage bumps its limits at the very edge.
+
+## Setup pause
+Every file starts by moving the pen to the front-left corner of the reachable area, lowering it
+onto the paper, and pausing (`M0`). Use that time to change the speed % or nudge Z from the
+printer's menu, then click to start. `--no-pause` skips it.
