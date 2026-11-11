@@ -123,10 +123,15 @@ def write_gcode(polys, args, out):
         w("M211 S0 ; software endstops off so Z can go below the assumed start height\n")
         w(f"G92 Z{args.z_up} ; ASSUMES the pen was manually lowered/raised to the pen-up height before starting\n")
     w(f"G0 Z{args.z_up} F{args.z_speed} ; pen up\n")
-    if args.pause_for_paper:
-        px, py = nozzle_xy(args.paper_x, args.paper_y, args)
-        w(f"G0 X{px:.2f} Y{py:.2f} F{args.travel_speed}\n")
-        w("M0 Load paper / check pen, then click to start\n")
+    if not args.no_pause:
+        # Park the pen on the front-left corner of the area it can reach, touching the
+        # paper, and wait so speed and Z height can be tuned from the printer's menu.
+        rx0, ry0, _, _ = pen_reachable(args)
+        px, py = nozzle_xy(rx0, ry0, args)
+        w(f"G0 X{px:.3f} Y{py:.3f} F{args.travel_speed} ; front-left corner for setup\n")
+        w(f"G1 Z{args.z_down} F{args.z_speed} ; pen down so you can check the height\n")
+        w("M0 Adjust speed and Z height, then click to start\n")
+        w(f"G0 Z{args.z_up} F{args.z_speed} ; pen up\n")
 
     pen_down = False
     pos = None
@@ -188,9 +193,8 @@ def main():
     ap.add_argument("--manual-z", action="store_true",
                     help="home X/Y only and treat the Z height at start as --z-up (default: full G28, which "
                          "probes Z at the bed centre)")
-    ap.add_argument("--pause-for-paper", action="store_true", help="insert an M0 pause before drawing")
-    ap.add_argument("--paper-x", type=float, default=110.0)
-    ap.add_argument("--paper-y", type=float, default=110.0)
+    ap.add_argument("--no-pause", action="store_true",
+                    help="skip the setup pause at the front-left corner before drawing starts")
     ap.add_argument("--flip-y", action="store_true", help="mirror Y (if your drawing comes out upside-down)")
     args = ap.parse_args()
 
