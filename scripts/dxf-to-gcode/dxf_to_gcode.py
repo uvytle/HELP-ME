@@ -28,11 +28,16 @@ UNIT_TO_MM = {0: 1.0, 1: 25.4, 2: 304.8, 4: 1.0, 5: 10.0, 6: 1000.0, 8: 0.0254}
 # Ender 3 V3 SE bed is 220 x 220 mm.
 BED = 220.0
 
-# Where the pen tip sits relative to the nozzle (mm): 1.75" to the right (+X) and
-# 1.25" toward the front of the printer (-Y). Printer coordinates are always for the
-# nozzle, so every XY move is shifted by this offset to put the PEN where we want it.
-PEN_OFFSET_X = 1.75 * 25.4
-PEN_OFFSET_Y = -1.25 * 25.4
+# The pen is physically 1.75" right of and 1.25" toward the front of the nozzle, but the
+# bed plate has been moved to compensate. So the pen at nozzle (0, 0) is the bottom-left
+# (0, 0) of the usable paper area, and no software offset is needed (default 0). If the
+# plate is ever put back, pass --pen-offset-x 44.45 --pen-offset-y -31.75 instead.
+PEN_OFFSET_X = 0.0
+PEN_OFFSET_Y = 0.0
+
+# Usable plate area, mm, measured from the bottom-left corner (0, 0).
+WORK_W = 185.0
+WORK_H = 220.0
 
 
 def collect_polylines(msp, flatten_dist):
@@ -96,26 +101,22 @@ def nozzle_xy(x, y, args):
 
 
 def pen_reachable(args):
-    """(x0, y0, x1, y1) of bed positions the pen tip can reach. The nozzle can only
-    travel 0..BED, so the offset shaves strips off two sides of the bed."""
+    """(x0, y0, x1, y1) of the usable pen area: the work area, trimmed to where the
+    nozzle can actually go (0..BED) once any software pen offset is applied."""
     return (max(0.0, args.pen_offset_x), max(0.0, args.pen_offset_y),
-            min(BED, BED + args.pen_offset_x), min(BED, BED + args.pen_offset_y))
+            min(args.work_w, BED + args.pen_offset_x), min(args.work_h, BED + args.pen_offset_y))
 
 
 def write_reference_dxf(path, rect):
-    """Reference drawing in mm, origin at the bed's front-left corner (same as the
-    pen coordinates in the G-code): the pen's drawable rectangle and the bed outline."""
+    """Reference drawing in mm: the usable pen rectangle, bottom-left at (0, 0)."""
     doc = ezdxf.new("R2010")
     doc.units = 4  # millimetres
     doc.header["$MEASUREMENT"] = 1
     doc.layers.add("PEN_DRAWABLE_AREA", color=1)
-    doc.layers.add("BED_220x220", color=8)
     msp = doc.modelspace()
     x0, y0, x1, y1 = rect
     msp.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True,
                        dxfattribs={"layer": "PEN_DRAWABLE_AREA"})
-    msp.add_lwpolyline([(0, 0), (BED, 0), (BED, BED), (0, BED)], close=True,
-                       dxfattribs={"layer": "BED_220x220"})
     doc.saveas(path)
 
 
@@ -188,11 +189,14 @@ def main():
     ap.add_argument("--scale", type=float, default=1.0, help="extra scale factor (default 1)")
     ap.add_argument("--fit", action="store_true", help="scale down (never up) to fit the drawing area")
     ap.add_argument("--center", action="store_true", help="centre the drawing in the drawing area")
+    ap.add_argument("--work-w", type=float, default=WORK_W, help="usable width from the bottom-left, mm (default 185)")
+    ap.add_argument("--work-h", type=float, default=WORK_H, help="usable height from the bottom-left, mm (default 220)")
     ap.add_argument("--pen-offset-x", type=float, default=PEN_OFFSET_X,
-                    help="pen tip is this many mm to the RIGHT of the nozzle (default 44.45 = 1.75in)")
+                    help="software correction: pen tip is this many mm RIGHT of the nozzle. Default 0 "
+                         "because the bed plate was moved to compensate (physical offset is 44.45 = 1.75in)")
     ap.add_argument("--pen-offset-y", type=float, default=PEN_OFFSET_Y,
-                    help="pen tip is this many mm BEHIND the nozzle; negative = toward the front "
-                         "(default -31.75 = 1.25in toward the front)")
+                    help="software correction: pen tip is this many mm BEHIND the nozzle (negative = toward "
+                         "the front). Default 0, see above (physical offset is -31.75 = 1.25in)")
     ap.add_argument("--origin-x", type=float, help="drawing area left edge, mm (default: reachable area + 5)")
     ap.add_argument("--origin-y", type=float, help="drawing area front edge, mm (default: reachable area + 5)")
     ap.add_argument("--area-w", type=float, help="drawing area width, mm (default: reachable area - 10)")
@@ -228,7 +232,7 @@ def main():
               f"({x1 - x0:.1f} x {y1 - y0:.1f})")
         dxf_path = out_path.with_suffix(".dxf")
         write_reference_dxf(dxf_path, (x0, y0, x1, y1))
-        print(f"Wrote {dxf_path}: same rectangle plus the {BED:.0f} mm bed outline, in millimetres")
+        print(f"Wrote {dxf_path}: same rectangle, in millimetres")
         return
 
     if not args.dxf:

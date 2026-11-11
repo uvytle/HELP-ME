@@ -28,27 +28,25 @@ Layers/colors are ignored: everything is drawn with one pen.
    (travel). Change them with `--z-down` / `--z-up`; lower `--z-down` a fraction of a mm to
    press harder. Make sure the pen can't hit the bed anywhere, including the probe point at
    the bed centre. `--manual-z` homes X/Y only and treats the Z at start as the travel height.
-4. **Pen offset.** The pen sits 1.75" to the right of and 1.25" toward the front of the nozzle
-   (built in as `--pen-offset-x 44.45 --pen-offset-y -31.75`). All coordinates in the G-code
-   are shifted so the *pen* lands where the drawing says. Because the nozzle can't leave the
-   bed, the pen can only reach X 44.4–220 and Y 0–188 mm; the drawing area defaults to that
-   region minus a 5 mm margin. Measure your real offset and change the two values if it differs.
+4. **Pen offset & work area.** The pen sits 1.75" right of and 1.25" toward the front of the
+   nozzle, but the bed plate was moved to compensate, so the software offset is 0: the pen at
+   nozzle (0, 0) is the bottom-left (0, 0) of the paper area, and the usable area is
+   **185 × 220 mm** (`--work-w`, `--work-h`). The drawing area defaults to that minus a 5 mm
+   margin. If the plate is ever moved back, use `--pen-offset-x 44.45 --pen-offset-y -31.75`.
 5. Tape the paper down inside that reachable area.
 
 ## Draw the outer edge of the usable area
 ```
 python dxf_to_gcode.py --perimeter
 ```
-Writes `pen_perimeter.gcode`: a rectangle around the furthest the pen can reach (X 44.45–220,
-Y 0–188.25 mm with the default offset). Handy for checking paper placement and the pen offset.
-`--perimeter-inset 3` pulls it in 3 mm if the carriage bumps its limits at the very edge.
+Writes `pen_perimeter.gcode`: a rectangle around the full usable area, (0, 0) to (185, 220) mm.
+Handy for checking paper placement. `--perimeter-inset 3` pulls it in 3 mm if the carriage bumps
+its limits at the very edge.
+
+It also writes `pen_perimeter.dxf` (millimetres, bottom-left at (0, 0)): one layer,
+`PEN_DRAWABLE_AREA`, the 185 x 220 rectangle. Open it in CAD as a reference to design inside.
 
 ## Setup pause
-Every file starts by moving the pen to the front-left corner of the reachable area, lowering it
-onto the paper, and pausing (`M0`). Use that time to change the speed % or nudge Z from the
-printer's menu, then click to start. `--no-pause` skips it.
-
-`--perimeter` also writes `pen_perimeter.dxf` (millimetres, origin at the bed's front-left corner):
-layer `PEN_DRAWABLE_AREA` is the rectangle the pen can reach, layer `BED_220x220` is the bed outline.
-Open it in CAD as a reference to place your drawing. Don't feed it back into the converter; the
-bed outline lies outside the pen's reach.
+Every file starts by moving the pen to the front-left corner (0, 0), lowering it onto the
+paper, and pausing (`M0`). Use that time to change the speed % or nudge Z from the printer's
+menu, then click to start. `--no-pause` skips it.
