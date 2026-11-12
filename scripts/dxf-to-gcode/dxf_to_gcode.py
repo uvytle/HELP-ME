@@ -73,22 +73,58 @@ def transform(polys, scale, dx, dy):
 
 def order_polylines(polys, start=(0.0, 0.0)):
     """Greedy nearest-neighbour ordering to cut pen-up travel. Open paths may be
-    reversed; closed paths are left alone (the pen just starts at one end)."""
-    remaining = list(polys)
+    reversed; closed paths are left alone (the pen just starts at one end).
+
+    Endpoints live in a coarse grid so each lookup only scans nearby cells; a plain
+    scan of every stroke per step is far too slow for drawings with 10k+ strokes."""
+    n = len(polys)
+    if n == 0:
+        return []
+    xs = [p[0] for pl, _ in polys for p in (pl[0], pl[-1])]
+    ys = [p[1] for pl, _ in polys for p in (pl[0], pl[-1])]
+    x0, y0 = min(xs), min(ys)
+    w, h = max(xs) - x0, max(ys) - y0
+    cell = max(math.sqrt(max(w * h, 1e-9) / n) * 2, 1e-3, max(w, h) / 2000)
+    gx, gy = int(w / cell) + 1, int(h / cell) + 1
+
+    grid = {}
+    for i, (pl, closed) in enumerate(polys):
+        ends = [(pl[0], False)] if closed else [(pl[0], False), (pl[-1], True)]
+        for (x, y), rev in ends:
+            grid.setdefault((int((x - x0) / cell), int((y - y0) / cell)), []).append((i, rev, x, y))
+
+    used = [False] * n
     ordered = []
     cur = start
-    while remaining:
-        best_i, best_d, best_rev = 0, float("inf"), False
-        for i, (pl, closed) in enumerate(remaining):
-            d = math.dist(cur, pl[0])
-            if d < best_d:
-                best_i, best_d, best_rev = i, d, False
-            if not closed:
-                d = math.dist(cur, pl[-1])
-                if d < best_d:
-                    best_i, best_d, best_rev = i, d, True
-        pl, closed = remaining.pop(best_i)
-        if best_rev:
+    rmax = max(gx, gy)
+    for _ in range(n):
+        cx = min(max(int((cur[0] - x0) / cell), 0), gx - 1)
+        cy = min(max(int((cur[1] - y0) / cell), 0), gy - 1)
+        best = None
+        best_d = float("inf")
+        r = 0
+        while r <= rmax:
+            if best is not None and best_d <= (r - 1) * cell:
+                break
+            if r == 0:
+                cells = [(cx, cy)]
+            else:
+                cells = ([(cx + dx, cy + dy) for dx in range(-r, r + 1) for dy in (-r, r)]
+                         + [(cx + dx, cy + dy) for dy in range(-r + 1, r) for dx in (-r, r)])
+            for key in cells:
+                lst = grid.get(key)
+                if not lst:
+                    continue
+                lst[:] = [e for e in lst if not used[e[0]]]
+                for i, rev, x, y in lst:
+                    d = math.hypot(cur[0] - x, cur[1] - y)
+                    if d < best_d:
+                        best, best_d = (i, rev), d
+            r += 1
+        i, rev = best
+        used[i] = True
+        pl, closed = polys[i]
+        if rev:
             pl = pl[::-1]
         ordered.append((pl, closed))
         cur = pl[-1]
