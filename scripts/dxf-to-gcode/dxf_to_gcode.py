@@ -242,7 +242,7 @@ def main():
                     help="Z work height, pen on paper (default 14; lower it a fraction of a mm to press harder)")
     ap.add_argument("--draw-speed", type=int, default=2000, help="drawing feedrate mm/min (default 2000)")
     ap.add_argument("--travel-speed", type=int, default=6000, help="pen-up feedrate mm/min (default 6000)")
-    ap.add_argument("--z-speed", type=int, default=600, help="Z feedrate mm/min (default 600)")
+    ap.add_argument("--z-speed", type=int, default=1500, help="Z feedrate mm/min (default 1500)")
     ap.add_argument("--flatten", type=float, default=0.05,
                     help="max curve error in mm when approximating arcs/splines (default 0.05)")
     ap.add_argument("--join-tol", type=float, default=0.05,
