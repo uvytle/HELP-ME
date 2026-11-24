@@ -34,7 +34,7 @@ PRINTERS = {
     "ender3v3se": dict(label="Ender 3 V3 SE", bed=220.0, work_w=185.0, work_h=220.0,
                        z_up=17.0, z_down=14.0, z_measured=True),
     "cr10": dict(label="Ender CR-10", bed=300.0, work_w=290.0, work_h=300.0,
-                 z_up=25.0, z_down=20.0, z_measured=False),
+                 z_up=43.0, z_down=40.0, z_measured=True),
 }
 BED = PRINTERS["ender3v3se"]["bed"]  # only used by tools that import this module directly
 
