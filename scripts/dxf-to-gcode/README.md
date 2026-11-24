@@ -58,10 +58,10 @@ Pick the machine with `--printer` (default `ender3v3se`):
 | `--printer` | Bed travel | Usable area from (0, 0) | Z up / Z down |
 |---|---|---|---|
 | `ender3v3se` | 220 x 220 | 185 x 220 mm (X x Y) | 17 / 14, measured |
-| `cr10` | 300 x 300 | 290 x 300 mm (X x Y) | 25 / 20, **placeholders** |
+| `cr10` | 300 x 300 | 290 x 300 mm (X x Y) | 43 / 40, measured |
 
-For the CR-10, measure the pen heights and pass them: `--z-down <pen touches paper>` and
-`--z-up <pen clear of paper>`. The script warns until you do. Perimeter files for it:
-`python dxf_to_gcode.py --printer cr10 --perimeter` writes `pen_perimeter_cr10.gcode/.dxf`.
+For the CR-10 the pen touches the paper at Z 40 after homing, so pen-down is 40 and pen-up is 43.
+Perimeter files for it: `python dxf_to_gcode.py --printer cr10 --perimeter` writes
+`pen_perimeter_cr10.gcode/.dxf`.
 Home the pen clear of the bed first: with a pen sticking out below the nozzle, X/Y homing
 at low Z can drag it across the paper.
