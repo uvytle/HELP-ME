@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Convert a DXF drawing into G-code for a pen plotter built on an Ender 3 V3 SE.
+"""Convert a DXF drawing into G-code for a pen plotter built on an Ender 3 V3 SE or CR-10
+(choose with --printer ender3v3se | cr10).
 
 The pen replaces the hotend. "Pen up / pen down" is done with the Z axis, so no
 servo or extra hardware is needed. No heaters are turned on and nothing extrudes.
@@ -25,8 +26,17 @@ except ImportError:
 # $INSUNITS code -> millimetres per drawing unit
 UNIT_TO_MM = {0: 1.0, 1: 25.4, 2: 304.8, 4: 1.0, 5: 10.0, 6: 1000.0, 8: 0.0254}
 
-# Ender 3 V3 SE bed is 220 x 220 mm.
-BED = 220.0
+# Per-printer settings. bed = nozzle travel in X and Y (mm); work_w/work_h = usable paper
+# area measured from the bottom-left (0, 0) with the pen attached; z_up/z_down = pen
+# travel/work heights (mm). Pick one with --printer; any of these can still be overridden
+# by flags. "z_measured": False means the Z heights are placeholders.
+PRINTERS = {
+    "ender3v3se": dict(label="Ender 3 V3 SE", bed=220.0, work_w=185.0, work_h=220.0,
+                       z_up=17.0, z_down=14.0, z_measured=True),
+    "cr10": dict(label="Ender CR-10", bed=300.0, work_w=290.0, work_h=300.0,
+                 z_up=25.0, z_down=20.0, z_measured=False),
+}
+BED = PRINTERS["ender3v3se"]["bed"]  # only used by tools that import this module directly
 
 # The pen is physically 1.75" right of and 1.25" toward the front of the nozzle, but the
 # bed plate has been moved to compensate. So the pen at nozzle (0, 0) is the bottom-left
@@ -140,7 +150,7 @@ def pen_reachable(args):
     """(x0, y0, x1, y1) of the usable pen area: the work area, trimmed to where the
     nozzle can actually go (0..BED) once any software pen offset is applied."""
     return (max(0.0, args.pen_offset_x), max(0.0, args.pen_offset_y),
-            min(args.work_w, BED + args.pen_offset_x), min(args.work_h, BED + args.pen_offset_y))
+            min(args.work_w, args.bed + args.pen_offset_x), min(args.work_h, args.bed + args.pen_offset_y))
 
 
 def write_reference_dxf(path, rect):
@@ -207,7 +217,7 @@ def write_gcode(polys, args, out):
         pos = pl[-1]
 
     w(f"G0 Z{args.z_up} F{args.z_speed} ; pen up\n")
-    w(f"G0 X0 Y{BED - 20:.0f} F{args.travel_speed} ; park out of the way\n")
+    w(f"G0 X0 Y{args.bed - 20:.0f} F{args.travel_speed} ; park out of the way\n")
     heaters_off(w)
     w("M84 ; motors off\n")
 
@@ -225,8 +235,10 @@ def main():
     ap.add_argument("--scale", type=float, default=1.0, help="extra scale factor (default 1)")
     ap.add_argument("--fit", action="store_true", help="scale down (never up) to fit the drawing area")
     ap.add_argument("--center", action="store_true", help="centre the drawing in the drawing area")
-    ap.add_argument("--work-w", type=float, default=WORK_W, help="usable width from the bottom-left, mm (default 185)")
-    ap.add_argument("--work-h", type=float, default=WORK_H, help="usable height from the bottom-left, mm (default 220)")
+    ap.add_argument("--printer", choices=sorted(PRINTERS), default="ender3v3se",
+                    help="printer profile: bed size, usable area and default Z heights (default ender3v3se)")
+    ap.add_argument("--work-w", type=float, help="usable width from the bottom-left, mm (default: from --printer)")
+    ap.add_argument("--work-h", type=float, help="usable height from the bottom-left, mm (default: from --printer)")
     ap.add_argument("--pen-offset-x", type=float, default=PEN_OFFSET_X,
                     help="software correction: pen tip is this many mm RIGHT of the nozzle. Default 0 "
                          "because the bed plate was moved to compensate (physical offset is 44.45 = 1.75in)")
@@ -237,9 +249,9 @@ def main():
     ap.add_argument("--origin-y", type=float, help="drawing area front edge, mm (default: reachable area + 5)")
     ap.add_argument("--area-w", type=float, help="drawing area width, mm (default: reachable area - 10)")
     ap.add_argument("--area-h", type=float, help="drawing area height, mm (default: reachable area - 10)")
-    ap.add_argument("--z-up", type=float, default=17.0, help="Z travel height, pen lifted (default 17)")
-    ap.add_argument("--z-down", type=float, default=14.0,
-                    help="Z work height, pen on paper (default 14; lower it a fraction of a mm to press harder)")
+    ap.add_argument("--z-up", type=float, help="Z travel height, pen lifted (default: from --printer)")
+    ap.add_argument("--z-down", type=float,
+                    help="Z work height, pen on paper (default: from --printer; lower it a fraction of a mm to press harder)")
     ap.add_argument("--draw-speed", type=int, default=2000, help="drawing feedrate mm/min (default 2000)")
     ap.add_argument("--travel-speed", type=int, default=6000, help="pen-up feedrate mm/min (default 6000)")
     ap.add_argument("--z-speed", type=int, default=1500, help="Z feedrate mm/min (default 1500)")
@@ -255,13 +267,23 @@ def main():
     ap.add_argument("--flip-y", action="store_true", help="mirror Y (if your drawing comes out upside-down)")
     args = ap.parse_args()
 
+    prof = PRINTERS[args.printer]
+    args.bed = prof["bed"]
+    placeholder_z = not prof["z_measured"] and args.z_up is None and args.z_down is None
+    for key in ("work_w", "work_h", "z_up", "z_down"):
+        if getattr(args, key) is None:
+            setattr(args, key, prof[key])
+    if placeholder_z:
+        print(f"WARNING: {prof['label']} Z heights ({args.z_down} on paper / {args.z_up} lifted) are "
+              "placeholders, not measured. Set the real ones with --z-down and --z-up.", file=sys.stderr)
+
     rx0, ry0, rx1, ry1 = pen_reachable(args)
 
     if args.perimeter:
         i = args.perimeter_inset
         x0, y0, x1, y1 = rx0 + i, ry0 + i, rx1 - i, ry1 - i
         polys = [([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)], True)]
-        out_path = Path(args.output) if args.output else Path("pen_perimeter.gcode")
+        out_path = Path(args.output) if args.output else Path("pen_perimeter.gcode" if args.printer == "ender3v3se" else f"pen_perimeter_{args.printer}.gcode")
         with open(out_path, "w", newline="\n") as f:
             write_gcode(polys, args, f)
         print(f"Wrote {out_path}: rectangle X {x0:.2f}-{x1:.2f}, Y {y0:.2f}-{y1:.2f} mm "
