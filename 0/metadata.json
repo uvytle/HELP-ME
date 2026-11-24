@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.10.6",
+  "checkpoint_id": "01M85Y5MY4C9RTZQE4TF1SJEDM",
+  "session_id": "f9b2e7f7-2abc-49c4-a321-f351d96ea344",
+  "strategy": "manual-commit",
+  "created_at": "2026-11-24T04:49:06.9850771Z",
+  "branch": "claude/pen-plotter-cr10",
+  "checkpoints_count": 1,
+  "files_touched": [],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5-5",
+  "turn_id": "d9ebcc4ba4fe",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 278,
+    "cache_creation_tokens": 1095002,
+    "cache_read_tokens": 15797078,
+    "output_tokens": 77971,
+    "api_call_count": 121
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
